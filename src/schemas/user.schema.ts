@@ -13,7 +13,7 @@ export class User extends BaseSchema {
     @Prop({ required: true })
     password: string;
     @Prop()
-    gender: string;
+    gender: boolean;
     @Prop()
     avatar: string;
     @Prop()
@@ -24,6 +24,8 @@ export class User extends BaseSchema {
     bio: string;
     @Prop()
     activeCode: string;
+    @Prop()
+    isActive: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
