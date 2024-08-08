@@ -1,7 +1,10 @@
 import { Prop } from "@nestjs/mongoose";
+import mongoose, { Types } from "mongoose";
 
 export class BaseSchema {
-    @Prop({ default: new Date() })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, default: () => new Types.ObjectId() })
+    _id?: string | mongoose.Schema.Types.ObjectId;
+    @Prop()
     createdAt: Date;
     @Prop()
     updatedAt: Date;
