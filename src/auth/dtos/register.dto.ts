@@ -1,4 +1,4 @@
-import { IsDateString, IsEmail, IsNotEmpty } from "class-validator";
+import { IsBoolean, IsDateString, IsEmail, IsNotEmpty } from "class-validator";
 
 export class RegisterDto {
     firstName: string;
@@ -7,6 +7,8 @@ export class RegisterDto {
     email: string;
     @IsDateString()
     dob: Date;
+    @IsBoolean()
+    gender: boolean;
     @IsNotEmpty()
     password: string;
 }
