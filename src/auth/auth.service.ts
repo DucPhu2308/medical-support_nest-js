@@ -81,11 +81,10 @@ export class AuthService {
         if (!user.isActive) {
             throw new HttpException('Account is not active', 400);
         }
-
         const payload = new UserResponse(user);
         const token = this.jwtService.sign(payload);
 
-        return { user, token };
+        return { user , token };
     }
 
     async register(registerDto: RegisterDto) {
