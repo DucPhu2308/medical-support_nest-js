@@ -8,7 +8,7 @@ import { LoginDto } from './dtos/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ActiveAccountDto } from './dtos/active-account.dto';
-import { plainToClass, plainToInstance } from 'class-transformer';
+import { instanceToPlain, plainToClass, plainToInstance } from 'class-transformer';
 import { UserResponse } from './dtos/user-response.dto';
 import { ORG_NAME } from 'src/common/constances';
 
@@ -81,10 +81,13 @@ export class AuthService {
         if (!user.isActive) {
             throw new HttpException('Account is not active', 400);
         }
-        const payload = new UserResponse(user);
-        const token = this.jwtService.sign(payload);
+        const userRes = new UserResponse(user);
+        const token = this.jwtService.sign({
+            sub: userRes._id,
+            email: userRes.email
+        });
 
-        return { user , token };
+        return { user: userRes, token };
     }
 
     async register(registerDto: RegisterDto) {
