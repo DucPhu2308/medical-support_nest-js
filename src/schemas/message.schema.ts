@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { BaseSchema } from "./base.schema";
-import mongoose, { HydratedDocument } from "mongoose";
+import mongoose, { HydratedDocument, Types } from "mongoose";
 import { User } from "./user.schema";
 
 @Schema({timestamps: true})
@@ -9,7 +9,7 @@ export class Message extends BaseSchema {
     content: string;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-    sender: User;
+    sender: Types.ObjectId;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

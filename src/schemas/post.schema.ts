@@ -12,15 +12,15 @@ export class Post extends BaseSchema {
     @Prop({ required: true })
     content: string;
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-    author: User;
+    author: Types.ObjectId;
     @Prop({ type: [String]})
     images: string[];
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Speciality' }]})
-    tags: Speciality[];
+    tags: Types.ObjectId[];
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }]})
-    comments: Comment[];
+    comments: Types.ObjectId[];
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
-    likedBy: User[];
+    likedBy: Types.ObjectId[];
 }
 
 export type PostDocument = HydratedDocument<Post>;
