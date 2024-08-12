@@ -8,6 +8,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe({
     transform: true,
+    // whitelist: true,
+    // enableDebugMessages: true,
   }));
   app.enableCors({
     origin: 'http://localhost:3000', // Thay đổi URL này thành nguồn bạn muốn cho phép

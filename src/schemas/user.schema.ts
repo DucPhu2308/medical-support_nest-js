@@ -3,6 +3,14 @@ import { BaseSchema } from "./base.schema";
 import mongoose, { HydratedDocument, Types } from "mongoose";
 import { DoctorInfo } from "./doctor-info.schema";
 
+
+export enum UserRole {
+    CLIENT = 'CLIENT',
+    DOCTOR = 'DOCTOR',
+    NURSE = 'NURSE',
+    ADMIN = 'ADMIN'
+}
+
 @Schema({timestamps: true})
 export class User extends BaseSchema {
     @Prop()
@@ -27,7 +35,7 @@ export class User extends BaseSchema {
     activeCode: string;
     @Prop({ default: false })
     isActive: boolean;
-    @Prop({ type: [{ type: String, enum: ['CLIENT', 'DOCTOR', 'NURSE', 'ADMIN']}], default: ['CLIENT'] })
+    @Prop({ type: [{ type: String, enum: UserRole, default: ['CLIENT']}] })
     roles: string[];
     @Prop({ type: DoctorInfo})
     doctorInfo: DoctorInfo; 

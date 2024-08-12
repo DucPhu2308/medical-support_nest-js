@@ -8,9 +8,9 @@ export class Comment extends BaseSchema {
     @Prop({ required: true })
     content: string;
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-    author: User;
+    author: Types.ObjectId;
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }] })
-    replies: Comment[];
+    replies: Types.ObjectId[];
 }
 
 export type CommentDocument = HydratedDocument<Comment>;

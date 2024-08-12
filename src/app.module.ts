@@ -5,11 +5,13 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { PostModule } from './post/post.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [
     AuthModule,
-    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
+    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true, cache: true }),
     MongooseModule.forRoot(process.env.MONGO_URI),
     MailerModule.forRoot({
       transport: {
@@ -20,6 +22,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
         },
       },
     }),
+    PostModule,
+    FirebaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
