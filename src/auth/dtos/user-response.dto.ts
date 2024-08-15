@@ -3,7 +3,7 @@ import mongoose, { Types } from "mongoose";
 import { User, UserDocument } from "src/schemas/user.schema";
 
 export class UserResponse {
-    constructor(user: UserDocument) {
+    constructor(user: User) {
         this._id = user._id;
         this.firstName = user.firstName;
         this.lastName = user.lastName;
@@ -15,7 +15,7 @@ export class UserResponse {
         this.isActive = user.isActive;
         this.bio = user.bio;
     }
-    _id: string | mongoose.Schema.Types.ObjectId;
+    _id: Types.ObjectId;
     firstName: string;
     lastName: string;
     email: string;

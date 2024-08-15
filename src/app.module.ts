@@ -7,6 +7,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PostModule } from './post/post.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { FirebaseModule } from './firebase/firebase.module';
     }),
     PostModule,
     FirebaseModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

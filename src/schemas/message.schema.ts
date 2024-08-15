@@ -24,7 +24,7 @@ export interface CallMessage {
 
 @Schema({timestamps: true})
 export class Message extends BaseSchema {
-    @Prop({ required: true })
+    @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
     content: string | AppointmentMessage | CallMessage;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
@@ -32,6 +32,9 @@ export class Message extends BaseSchema {
 
     @Prop({ enum: MessageType})
     type: MessageType;
+
+    @Prop({ default: false })
+    isRead: boolean;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);
