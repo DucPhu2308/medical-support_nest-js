@@ -13,17 +13,24 @@ export class PostService {
         private readonly firebaseService: FirebaseService,
     ) { }
 
-    async createPost(createPostDto: CreatePostDto, files: Array<Express.Multer.File>) {
+    async createPost(createPostDto: CreatePostDto) {
+        const files = createPostDto.images;
 
-        const images = await Promise.all(
-            files.map(async (file) => {
-                return await this.firebaseService.uploadFile(file, UploadFolder.POST);
-            })
-        );
-        return await this.postModel.create({
-            ...createPostDto,
-            images,
-        });
+        if (files) {
+            const images = await Promise.all(
+                files.map(async (file) => {
+                    return await this.firebaseService.uploadFile(file, UploadFolder.POST);
+                })
+            );
+
+            return await this.postModel.create({
+                ...createPostDto,
+                images,
+            });
+        } else {
+            return await this.postModel.create(createPostDto);
+        }
+        
     }
 
     async getAllPosts() {

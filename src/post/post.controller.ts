@@ -1,20 +1,27 @@
-import { Body, Controller, Post, UseGuards, Request, Get, Put, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Request, Get, Put, UseInterceptors, UploadedFiles, Param } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 @Controller('api/post')
+@ApiTags('post')
+@ApiBearerAuth()
 export class PostController {
     constructor(private readonly postService: PostService) {}
 
     @Post()
     @UseGuards(AuthGuard)
     @UseInterceptors(FilesInterceptor('images'))
-    async createPost(@Body() createPostDto: CreatePostDto, @Request() req, 
+    @ApiConsumes('multipart/form-data')
+    async createPost(@Body() createPostDto: CreatePostDto, @Request() req,
         @UploadedFiles() files: Array<Express.Multer.File>) {
         createPostDto.author = req.user.sub;
-        return this.postService.createPost(createPostDto, files);
+        if (files) {
+            createPostDto.images = files;
+        }
+        return this.postService.createPost(createPostDto);
     }
 
     @Get()
@@ -24,13 +31,13 @@ export class PostController {
 
     @Put('/like/:postId')
     @UseGuards(AuthGuard)
-    async likePost(@Request() req) {
-        return this.postService.likePost(req.params.postId, req.user.sub);
+    async likePost(@Request() req, @Param('postId') postId: string) {
+        return this.postService.likePost(postId, req.user.sub);
     }
 
     @Put('/unlike/:postId')
     @UseGuards(AuthGuard)
-    async unlikePost(@Request() req) {
-        return this.postService.unlikePost(req.params.postId, req.user.sub);
+    async unlikePost(@Request() req, @Param('postId') postId: string) {
+        return this.postService.unlikePost(postId, req.user.sub);
     }
 }
