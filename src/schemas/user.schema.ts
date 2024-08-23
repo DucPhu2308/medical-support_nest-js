@@ -35,7 +35,7 @@ export class User extends BaseSchema {
     activeCode: string;
     @Prop({ default: false })
     isActive: boolean;
-    @Prop({ type: [{ type: String, enum: UserRole, default: ['CLIENT']}] })
+    @Prop({ type: [{ type: String, enum: UserRole}], default: [UserRole.CLIENT] })
     roles: string[];
     @Prop({ type: DoctorInfo})
     doctorInfo: DoctorInfo; 
