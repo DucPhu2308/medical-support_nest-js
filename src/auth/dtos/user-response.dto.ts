@@ -14,6 +14,7 @@ export class UserResponse {
         this.updatedAt = user.updatedAt;
         this.isActive = user.isActive;
         this.bio = user.bio;
+        this.roles = user.roles;
     }
     _id: Types.ObjectId;
     firstName: string;
@@ -25,4 +26,5 @@ export class UserResponse {
     createdAt: Date;
     updatedAt: Date;
     isActive: boolean;
+    roles: string[];
 }
