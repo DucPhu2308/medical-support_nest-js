@@ -5,6 +5,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Chat, ChatSchema } from 'src/schemas/chat.schema';
 import { Message, MessageSchema } from 'src/schemas/message.schema';
 import { ChatService } from './chat.service';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
+import { ChatController } from './chat.controller';
 
 @Module({
   imports: [
@@ -12,7 +15,15 @@ import { ChatService } from './chat.service';
       { name: Chat.name, schema: ChatSchema },
       { name: Message.name, schema: MessageSchema }
     ]),
+    ConfigModule.forRoot(),
+    // TODO: separate this into a shared module
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '7d' },
+    })
   ],
-  providers: [ChatGateway, ChatService]
+  providers: [ChatGateway, ChatService],
+  controllers: [ChatController]
 })
 export class ChatModule {}

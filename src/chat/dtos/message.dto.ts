@@ -1,4 +1,5 @@
 import { IsEnum, IsNotEmpty } from "class-validator";
+import { Types } from "mongoose";
 import { MessageType } from "src/schemas/message.schema";
 
 
@@ -7,9 +8,9 @@ export class MessageDto {
     content: string;
 
     @IsNotEmpty()
-    recipient: string;
+    chat: Types.ObjectId;
     
-    sender: string;
+    sender: Types.ObjectId;
 
     @IsEnum(MessageType)
     type: MessageType;

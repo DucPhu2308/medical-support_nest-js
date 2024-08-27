@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Chat } from 'src/schemas/chat.schema';
 import { Message } from 'src/schemas/message.schema';
 import { MessageDto } from './dtos/message.dto';
@@ -13,6 +13,7 @@ export class ChatService {
         @InjectModel(Message.name) private readonly messageModel: Model<Message>
     ) { }
 
+    /*
     async newMessage(message: MessageDto) {
 
         const newMessage = new this.messageModel({
@@ -37,6 +38,41 @@ export class ChatService {
         chat.lastMessage = newMessage._id;
         await chat.save();
     }
+    */
+
+    async newMessage(message: MessageDto) {
+
+        const chat = await this.chatModel.findById(message.chat);
+
+        if (!chat) {
+            throw new HttpException('Chat not found', 404);
+        }
+
+        const newMessage = new this.messageModel({
+            content: message.content,
+            sender: message.sender,
+            type: message.type,
+            chat: message.chat
+        });
+
+        await newMessage.save();
+        chat.lastMessage = newMessage._id;
+        await chat.save();
+
+        return newMessage;
+    }
+
+    async newChat(participants: string[]) {
+        const chat = new this.chatModel({
+            participants: participants,
+            messages: []
+        });
+        return await chat.save();
+    }
+
+    async getChat(chatId: string | Types.ObjectId) {
+        return await this.chatModel.findById(chatId);
+    }
 
     async getChats(userId: string) {
         return await this.chatModel.find({ participants: userId })
@@ -45,12 +81,17 @@ export class ChatService {
             .populate('lastMessage');
     }
 
-    async getMessages(chatId: string, page: number, pageSize: number) {
-        return await this.chatModel.find({ _id: chatId })
+    async getMessagesPage(chatId: string, page: number, pageSize: number) {
+        return await this.messageModel.find({ chat: chatId })
             .sort({ createdAt: -1 })
             .skip((page - 1) * pageSize)
-            .limit(pageSize)
-            .populate('messages');
+            .limit(pageSize);
+    }
+
+    async getMessages(chatId: string) {
+        return await this.messageModel
+            .find({ chat: chatId })
+            .sort({ createdAt: -1 });
     }
 
 

@@ -4,7 +4,11 @@ import { MessageDto } from './dtos/message.dto';
 import { ChatService } from './chat.service';
 import { JwtService } from '@nestjs/jwt';
 
-@WebSocketGateway()
+@WebSocketGateway({ 
+  cors: {
+    origin: '*',
+  },
+})
 export class ChatGateway implements OnGatewayConnection {
 
   constructor(
@@ -24,13 +28,16 @@ export class ChatGateway implements OnGatewayConnection {
   */
 
   async handleConnection(client: Socket, ...args: any[]) {
+    console.log('client connected:', client.id);
 
     try{
       const token = client.handshake.auth.token || client.handshake.headers.token;
+      console.log('token:', token);
       const payload = this.jwtService.verify(token);
       client.data.user = payload;
       client.join(payload.sub);
 
+      // send list chats on connection
       const chats = await this.chatService.getChats(payload.sub);
       this.server.to(payload.sub).emit('list-chats', chats);
     } catch (err) {
@@ -40,11 +47,26 @@ export class ChatGateway implements OnGatewayConnection {
   }
 
 
-  @SubscribeMessage('message')
+  /* 
+    Save message to db and send to all participants
+  */
+  @SubscribeMessage('send-message')
   async handleMessage(client: Socket, message: MessageDto) {
     console.log('client:', client.data.user.sub);
     message.sender = client.data.user.sub;
-    await this.chatService.newMessage(message);
-    client.to(message.recipient).emit('message', message);
+    const newMessage = await this.chatService.newMessage(message);
+
+    const chat = await this.chatService.getChat(message.chat);
+
+    if (!chat) {
+      throw new Error('Chat not found');
+    } else {
+      // send message to all participants
+      // const participants = chat.participants.filter(p => p !== message.sender);
+      const participants = chat.participants;
+      for (const participant of participants) {
+        this.server.to(participant.toHexString()).emit('receive-message', newMessage);
+      }
+    }
   }
 }

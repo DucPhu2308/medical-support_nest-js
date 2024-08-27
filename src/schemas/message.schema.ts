@@ -35,6 +35,9 @@ export class Message extends BaseSchema {
 
     @Prop({ default: false })
     isRead: boolean;
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Chat', required: true })
+    chat: Types.ObjectId;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);
