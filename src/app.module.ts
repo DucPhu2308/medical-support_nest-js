@@ -8,6 +8,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { PostModule } from './post/post.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { ChatModule } from './chat/chat.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ChatModule } from './chat/chat.module';
     PostModule,
     FirebaseModule,
     ChatModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
