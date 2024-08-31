@@ -8,6 +8,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { PostModule } from './post/post.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { ChatModule } from './chat/chat.module';
+import { UserModule } from './user/user.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -26,6 +28,12 @@ import { ChatModule } from './chat/chat.module';
     PostModule,
     FirebaseModule,
     ChatModule,
+    UserModule,
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '7d' },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

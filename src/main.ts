@@ -13,7 +13,7 @@ async function bootstrap() {
     // enableDebugMessages: true,
   }));
   app.enableCors({
-    origin: 'http://localhost:3000', // Thay đổi URL này thành nguồn bạn muốn cho phép
+    origin: '*', // Thay đổi URL này thành nguồn bạn muốn cho phép
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });

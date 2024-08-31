@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsDateString, IsEmail, IsNotEmpty } from "class-validator";
+import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsOptional } from "class-validator";
 
 export class RegisterDto {
     @ApiProperty()
@@ -13,10 +13,12 @@ export class RegisterDto {
     email: string;
 
     @IsDateString()
+    @IsOptional()
     @ApiProperty()
     dob: Date;
 
     @IsBoolean()
+    @IsOptional()
     @ApiProperty()
     gender: boolean;
 
