@@ -15,13 +15,6 @@ import { ChatController } from './chat.controller';
       { name: Chat.name, schema: ChatSchema },
       { name: Message.name, schema: MessageSchema }
     ]),
-    ConfigModule.forRoot(),
-    // TODO: separate this into a shared module
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '7d' },
-    })
   ],
   providers: [ChatGateway, ChatService],
   controllers: [ChatController]

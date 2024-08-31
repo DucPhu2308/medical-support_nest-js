@@ -62,6 +62,13 @@ export class ChatService {
         return newMessage;
     }
 
+    async getChatById(chatId: string) {
+        return await this.chatModel
+            .findById(chatId)
+            .populate('participants', MONGO_SELECT.USER.DEFAULT)
+            .populate('lastMessage');
+    }
+
     async newChat(participants: string[]) {
         const chat = new this.chatModel({
             participants: participants,
@@ -74,9 +81,11 @@ export class ChatService {
         return await this.chatModel.findById(chatId);
     }
 
+    // get chats of a user with last message != null
     async getChats(userId: string) {
-        return await this.chatModel.find({ participants: userId })
-            .select('-messages') // exclude messages to reduce payload size
+        return await this.chatModel
+            .find({ participants: userId, lastMessage: { $ne: null } })
+            .sort({ updatedAt: -1 })
             .populate('participants', MONGO_SELECT.USER.DEFAULT)
             .populate('lastMessage');
     }
@@ -94,6 +103,18 @@ export class ChatService {
             .sort({ createdAt: -1 });
     }
 
+    async getPrivateChat(user1: string, user2: string) {
+        let chat = await this.chatModel.findOne({
+            participants: { $all: [user1, user2] }
+        });
+        if (!chat) {
+            chat = new this.chatModel({
+                participants: [user1, user2],
+            });
+            await chat.save();
+        }
 
+        return chat.populate('participants', MONGO_SELECT.USER.DEFAULT);
+    }
 
 }
