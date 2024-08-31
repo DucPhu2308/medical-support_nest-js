@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { ChatService } from './chat.service';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('api/chat')
 export class ChatController {
@@ -12,5 +13,17 @@ export class ChatController {
         } else {
             return this.chatService.getMessages(chatId);
         }
+    }
+
+    // get private chat of 2 users
+    @Get('/private/:userId')
+    @UseGuards(AuthGuard)
+    getPrivateChat(@Param('userId') userId: string, @Req() req) {
+        return this.chatService.getPrivateChat(userId, req.user.sub);
+    }
+
+    @Get('/:chatId')
+    getChat(@Param('chatId') chatId: string) {
+        return this.chatService.getChatById(chatId);
     }
 }

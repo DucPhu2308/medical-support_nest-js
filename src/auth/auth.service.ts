@@ -11,6 +11,7 @@ import { ActiveAccountDto } from './dtos/active-account.dto';
 import { instanceToPlain, plainToClass, plainToInstance } from 'class-transformer';
 import { UserResponse } from './dtos/user-response.dto';
 import { ORG_NAME } from 'src/common/constances';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -46,20 +47,39 @@ export class AuthService {
             throw new HttpException('User not found', 404);
         }
 
-        const tempPassword = this.generateTempPassword(12);
-        console.log(tempPassword);
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(tempPassword, salt);
+        user.activeCode = this.generateActiveCode();
 
         await user.save();
 
         // send email
         await this.mailerService.sendMail({
             to: user.email,
-            subject: `[${ORG_NAME}] Mật khẩu tạm thời`,
-            text: `Mật khẩu tạm thời của bạn là: ${tempPassword}\n` +
-                'Vui lòng đăng nhập và đổi mật khẩu ngay sau khi đăng nhập.',
+            subject: `[${ORG_NAME}] Đổi mật khẩu`,
+            text: `Mã OTP của bạn là: ${user.activeCode}\n` +
+                'Vui lòng nhập OTP cùng mật khẩu mới để đổi mật khẩu.',
         });
+
+        return 'Success';
+    }
+
+    async resetPassword(resetPasswordDto: ResetPasswordDto) {
+        const user = await this.userModel.findOne(
+            { email: resetPasswordDto.email },
+        );
+        
+        if (!user) {
+            throw new HttpException('User not found', 404);
+        }
+
+        if (user.activeCode !== resetPasswordDto.activeCode) {
+            throw new HttpException('Invalid active code', 400);
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(resetPasswordDto.password, salt);
+        user.activeCode = '';
+
+        await user.save();
 
         return 'Success';
     }
