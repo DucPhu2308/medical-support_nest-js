@@ -5,12 +5,14 @@ import { Post } from 'src/schemas/post.schema';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { MONGO_SELECT } from 'src/common/constances';
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
+import { GetPostFillterDto } from './dtos/get-post-fillter.dto';
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectModel(Post.name) private postModel: Model<Post>,
         private readonly firebaseService: FirebaseService,
+        
     ) { }
 
     async createPost(createPostDto: CreatePostDto) {
@@ -38,6 +40,30 @@ export class PostService {
             .populate('author', MONGO_SELECT.USER.DEFAULT)
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT);
     }
+
+    async getPostByPostId(postId: string) {
+        return await this.postModel.findById(postId)
+            .populate('author', MONGO_SELECT.USER.DEFAULT)
+            .populate('likedBy', MONGO_SELECT.USER.DEFAULT);
+    }
+
+    async getPostBySearch(filterDto: GetPostFillterDto) {
+        const query : any = {};
+
+        if (filterDto.postId) {
+            query._id = new Types.ObjectId(filterDto.postId);
+        }
+
+        if (filterDto.userId) {
+            query.author = new Types.ObjectId(filterDto.userId);
+        }
+
+        return this.postModel.find(query)
+            .populate('author', MONGO_SELECT.USER.DEFAULT)
+            .populate('likedBy', MONGO_SELECT.USER.DEFAULT);
+    }
+
+        
 
     async likePost(postId: string, userId: string) {
         const post = await this.postModel.findById(postId);
@@ -69,5 +95,19 @@ export class PostService {
         }
 
         return await post.save();
+    }
+
+    async deletePost(postId: string, userId: string) {
+        const post = await this.postModel.findById(postId);
+        if (!post) {
+            throw new Error('Post not found');
+        }
+
+        if (post.author.toString() !== userId) {
+            throw new Error('Unauthorized');
+        }
+
+        await this.postModel.deleteOne({ _id: new Types.ObjectId(postId) });
+        return 'Delete success';
     }
 }
