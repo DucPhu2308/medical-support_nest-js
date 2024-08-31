@@ -10,6 +10,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { ChatModule } from './chat/chat.module';
 import { UserModule } from './user/user.module';
 import { JwtModule } from '@nestjs/jwt';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { JwtModule } from '@nestjs/jwt';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '7d' },
     }),
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
