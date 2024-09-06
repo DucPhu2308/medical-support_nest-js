@@ -21,6 +21,10 @@ export class Post extends BaseSchema {
     comments: Types.ObjectId[];
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
     likedBy: Types.ObjectId[];
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
+    lovedBy: Types.ObjectId[];
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
+    surprisedBy: Types.ObjectId[];
 }
 
 export type PostDocument = HydratedDocument<Post>;
