@@ -60,7 +60,10 @@ export class PostService {
 
         return this.postModel.find(query)
             .populate('author', MONGO_SELECT.USER.DEFAULT)
-            .populate('likedBy', MONGO_SELECT.USER.DEFAULT);
+            .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
+            .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
+            .populate('surprisedBy', MONGO_SELECT.USER.DEFAULT);
+
     }
 
         
@@ -95,6 +98,28 @@ export class PostService {
         }
 
         return await post.save();
+    }
+
+    async handleReaction(postId: string, userId: string, reactionType: 'like' | 'love' | 'surprise') {
+        const post = await this.postModel.findById(postId);
+        if (!post) throw new Error('Post not found');
+
+        // Xóa cảm xúc khác của người dùng nếu có
+        post.likedBy = post.likedBy.filter(id => id.toString() !== userId);
+        post.lovedBy = post.lovedBy.filter(id => id.toString() !== userId);
+        post.surprisedBy = post.surprisedBy.filter(id => id.toString() !== userId);
+
+        // Thêm cảm xúc mới
+        if (reactionType === 'like') {
+            post.likedBy.push(new Types.ObjectId(userId));
+        } else if (reactionType === 'love') {
+            post.lovedBy.push(new Types.ObjectId(userId));
+        } else if (reactionType === 'surprise') {
+            post.surprisedBy.push(new Types.ObjectId(userId));
+        }
+
+        await post.save();
+        return { message: `Post ${reactionType}d successfully` };
     }
 
     async deletePost(postId: string, userId: string) {
