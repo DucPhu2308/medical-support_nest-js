@@ -26,4 +26,10 @@ export class ChatController {
     getChat(@Param('chatId') chatId: string) {
         return this.chatService.getChatById(chatId);
     }
+
+    @Get()
+    @UseGuards(AuthGuard)
+    getChats(@Req() req) {
+        return this.chatService.getChats(req.user.sub);
+    }
 }

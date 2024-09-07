@@ -5,7 +5,7 @@ import { MessageType } from "src/schemas/message.schema";
 
 export class MessageDto {
     @IsNotEmpty()
-    content: string;
+    content: any;
 
     @IsNotEmpty()
     chat: Types.ObjectId;

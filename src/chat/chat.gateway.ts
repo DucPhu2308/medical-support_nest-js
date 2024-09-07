@@ -3,17 +3,21 @@ import { Server, Socket } from 'socket.io';
 import { MessageDto } from './dtos/message.dto';
 import { ChatService } from './chat.service';
 import { JwtService } from '@nestjs/jwt';
+import { MessageType } from 'src/schemas/message.schema';
+import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
 
 @WebSocketGateway({ 
   cors: {
     origin: '*',
   },
+  maxHttpBufferSize: 1e8, // 100MB
 })
 export class ChatGateway implements OnGatewayConnection {
 
   constructor(
     private readonly chatService: ChatService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly firebaseService: FirebaseService
   ) { }
 
   @WebSocketServer()
@@ -38,8 +42,8 @@ export class ChatGateway implements OnGatewayConnection {
       client.join(payload.sub);
 
       // send list chats on connection
-      const chats = await this.chatService.getChats(payload.sub);
-      this.server.to(payload.sub).emit('list-chats', chats);
+      // const chats = await this.chatService.getChats(payload.sub);
+      // this.server.to(payload.sub).emit('list-chats', chats);
     } catch (err) {
       console.log(err);
       client.disconnect();
@@ -54,15 +58,25 @@ export class ChatGateway implements OnGatewayConnection {
   async handleMessage(client: Socket, message: MessageDto) {
     console.log('client:', client.data.user.sub);
     message.sender = client.data.user.sub;
-    const newMessage = await this.chatService.newMessage(message);
 
     const chat = await this.chatService.getChat(message.chat);
 
     if (!chat) {
       throw new Error('Chat not found');
     } else {
+      let newMessage;
+      if (message.type === MessageType.TEXT) {
+        newMessage = await this.chatService.newMessage(message);
+      } else if (message.type === MessageType.IMAGE) {
+        const images = await Promise.all(
+          message.content.map(async (image: Buffer) => {
+            return await this.firebaseService.uploadImageBuffer(image, UploadFolder.MESSAGE);
+          })
+        );
+        newMessage = await this.chatService.newMessage({ ...message, content: images });
+      }
+
       // send message to all participants
-      // const participants = chat.participants.filter(p => p !== message.sender);
       const participants = chat.participants;
       for (const participant of participants) {
         this.server.to(participant.toHexString()).emit('receive-message', newMessage);

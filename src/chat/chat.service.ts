@@ -13,33 +13,6 @@ export class ChatService {
         @InjectModel(Message.name) private readonly messageModel: Model<Message>
     ) { }
 
-    /*
-    async newMessage(message: MessageDto) {
-
-        const newMessage = new this.messageModel({
-            content: message.content,
-            sender: message.sender,
-            type: message.type,
-        });
-
-        await newMessage.save();
-
-        let chat = await this.chatModel.findOne({
-            participants: { $all: [message.sender, message.recipient] }
-        });
-
-        if (!chat) {
-            chat = new this.chatModel({
-                participants: [message.sender, message.recipient],
-                messages: []
-            });
-        }
-        chat.messages.push(newMessage._id);
-        chat.lastMessage = newMessage._id;
-        await chat.save();
-    }
-    */
-
     async newMessage(message: MessageDto) {
 
         const chat = await this.chatModel.findById(message.chat);

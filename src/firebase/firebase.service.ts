@@ -5,6 +5,8 @@ import { FIREBASE_IMAGE_URL } from 'src/common/constances';
 
 export enum UploadFolder {
     POST = 'post',
+    MESSAGE = 'message',
+    USER = 'user',
 }
 
 @Injectable()
@@ -22,6 +24,16 @@ export class FirebaseService {
 
         const filePath = `${folder}/${uniqueFileName}.${fileExtension}`;
         await this.firebaseRepository.uploadFile(filePath, file.buffer);
+
+        const imageUrl = `${FIREBASE_IMAGE_URL}/${folder}%2F${uniqueFileName}.${fileExtension}?alt=media`;
+        return imageUrl;
+    }
+
+    async uploadImageBuffer(buffer: Buffer, folder: UploadFolder) {
+        const uniqueFileName = uuidv4();
+        const fileExtension = 'jpg';
+        const filePath = `${folder}/${uniqueFileName}.${fileExtension}`;
+        await this.firebaseRepository.uploadFile(filePath, buffer);
 
         const imageUrl = `${FIREBASE_IMAGE_URL}/${folder}%2F${uniqueFileName}.${fileExtension}?alt=media`;
         return imageUrl;
