@@ -2,7 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Chat } from 'src/schemas/chat.schema';
-import { Message } from 'src/schemas/message.schema';
+import { AppointmentMessage, AppointmentStatus, Message } from 'src/schemas/message.schema';
 import { MessageDto } from './dtos/message.dto';
 import { MONGO_SELECT } from 'src/common/constances';
 
@@ -32,7 +32,7 @@ export class ChatService {
         chat.lastMessage = newMessage._id;
         await chat.save();
 
-        return newMessage;
+        return newMessage.populate('sender', MONGO_SELECT.USER.DEFAULT);
     }
 
     async getChatById(chatId: string) {
@@ -73,6 +73,7 @@ export class ChatService {
     async getMessages(chatId: string) {
         return await this.messageModel
             .find({ chat: chatId })
+            .populate('sender', MONGO_SELECT.USER.DEFAULT)
             .sort({ createdAt: -1 });
     }
 
@@ -88,6 +89,30 @@ export class ChatService {
         }
 
         return chat.populate('participants', MONGO_SELECT.USER.DEFAULT);
+    }
+
+    async updateApptMessageStatus(messageId: string, status: string) {
+        const message = await this.messageModel.findById(messageId).populate('sender', MONGO_SELECT.USER.DEFAULT);
+
+        if (!message) {
+            throw new HttpException('Message not found', 404);
+        }
+
+        if (message.type !== 'appointment') {
+            throw new HttpException('Message is not an appointment', 400);
+        }
+
+        (message.content as AppointmentMessage).apptStatus = status as AppointmentStatus;
+        // mark content as modified to trigger save
+        message.markModified('content');
+
+        return message.save();
+    }
+
+    async getMessage(messageId: string) {
+        return await this.messageModel
+            .findById(messageId)
+            .populate('sender', MONGO_SELECT.USER.DEFAULT);
     }
 
 }

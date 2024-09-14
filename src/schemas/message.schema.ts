@@ -10,11 +10,18 @@ export enum MessageType {
     CALL = 'call',
 }
 
+export enum AppointmentStatus {
+    PENDING = 'pending',
+    ACCEPTED = 'accepted',
+    REJECTED = 'rejected',
+    CANCELLED = 'cancelled',
+}
+
 export interface AppointmentMessage {
     title: string;
     content: string;
     date: Date;
-    isAccepted: boolean;
+    apptStatus: AppointmentStatus;
 }
 
 export interface CallMessage {
