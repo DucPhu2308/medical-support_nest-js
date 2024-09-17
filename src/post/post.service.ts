@@ -58,6 +58,14 @@ export class PostService {
             query.author = new Types.ObjectId(filterDto.userId);
         }
 
+        if (filterDto.title) {
+            query.title = { $regex: filterDto.title, $options: 'i' };
+        }
+
+        if (filterDto.content) {
+            query.content = { $regex: filterDto.content, $options: 'i' };
+        }
+
         return this.postModel.find(query)
             .populate('author', MONGO_SELECT.USER.DEFAULT)
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT)

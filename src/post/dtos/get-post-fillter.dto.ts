@@ -13,4 +13,14 @@ export class GetPostFillterDto {
     @ApiPropertyOptional()
     userId?: string;
 
+    @IsOptional()
+    @IsString()
+    @ApiPropertyOptional()
+    title?: string;
+
+    @IsOptional()
+    @IsString()
+    @ApiPropertyOptional()
+    content?: string;
+
 }
