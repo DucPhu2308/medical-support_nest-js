@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MONGO_SELECT } from 'src/common/constances';
 import { User } from 'src/schemas/user.schema';
+import { UpdateProfileDto } from './dtos/update-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -14,5 +15,9 @@ export class UserService {
         return this.userModel
             .find({ email: { $regex: email, $options: 'i' } })
             .select(MONGO_SELECT.USER.DEFAULT);
+    }
+
+    async updateProfile(userId: string, data: UpdateProfileDto) {
+        return this.userModel.updateOne({ _id: userId }, data);
     }
 }

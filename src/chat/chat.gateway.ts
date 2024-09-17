@@ -5,6 +5,7 @@ import { ChatService } from './chat.service';
 import { JwtService } from '@nestjs/jwt';
 import { MessageType } from 'src/schemas/message.schema';
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
+import { MONGO_SELECT } from 'src/common/constances';
 
 @WebSocketGateway({ 
   cors: {
@@ -65,8 +66,8 @@ export class ChatGateway implements OnGatewayConnection {
       throw new Error('Chat not found');
     } else {
       let newMessage;
-      if (message.type === MessageType.TEXT) {
-        newMessage = await this.chatService.newMessage(message);
+      if (message.type === MessageType.TEXT || message.type === MessageType.APPOINTMENT) {
+        newMessage = (await this.chatService.newMessage(message));
       } else if (message.type === MessageType.IMAGE) {
         const images = await Promise.all(
           message.content.map(async (image: Buffer) => {
@@ -81,6 +82,19 @@ export class ChatGateway implements OnGatewayConnection {
       for (const participant of participants) {
         this.server.to(participant.toHexString()).emit('receive-message', newMessage);
       }
+    }
+  }
+
+  @SubscribeMessage('update-appt-message-status')
+  async updateApptMessageStatus(client: Socket, data: { messageId: string, status: string }) {
+    const { messageId, status } = data;
+    console.log('update-appt-message-status:', messageId, status);
+    const message = await this.chatService.updateApptMessageStatus(messageId, status);
+
+    const chat = await this.chatService.getChat(message.chat);
+    const participants = chat.participants;
+    for (const participant of participants) {
+      this.server.to(participant.toHexString()).emit('update-message', message);
     }
   }
 }
