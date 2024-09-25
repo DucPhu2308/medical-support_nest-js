@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument, Types } from "mongoose";
+import { AppointmentStatus } from "./message.schema";
 
 
 @Schema({timestamps: true})
@@ -14,6 +15,10 @@ export class Appointment {
     sender: Types.ObjectId;
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     recipient: Types.ObjectId;
+    @Prop({ enum: AppointmentStatus, default: AppointmentStatus.ACCEPTED })
+    status: AppointmentStatus;
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Message' })
+    message: Types.ObjectId;
 }
 
 export const AppointmentSchema = SchemaFactory.createForClass(Appointment);

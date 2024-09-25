@@ -3,9 +3,10 @@ import { Server, Socket } from 'socket.io';
 import { MessageDto } from './dtos/message.dto';
 import { ChatService } from './chat.service';
 import { JwtService } from '@nestjs/jwt';
-import { MessageType } from 'src/schemas/message.schema';
+import { AppointmentMessage, AppointmentStatus, MessageType } from 'src/schemas/message.schema';
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
 import { MONGO_SELECT } from 'src/common/constances';
+import { AppointmentService } from 'src/appointment/appointment.service';
 
 @WebSocketGateway({ 
   cors: {
@@ -18,7 +19,8 @@ export class ChatGateway implements OnGatewayConnection {
   constructor(
     private readonly chatService: ChatService,
     private readonly jwtService: JwtService,
-    private readonly firebaseService: FirebaseService
+    private readonly firebaseService: FirebaseService,
+    private readonly appointmentService: AppointmentService
   ) { }
 
   @WebSocketServer()
@@ -89,7 +91,20 @@ export class ChatGateway implements OnGatewayConnection {
   async updateApptMessageStatus(client: Socket, data: { messageId: string, status: string }) {
     const { messageId, status } = data;
     console.log('update-appt-message-status:', messageId, status);
-    const message = await this.chatService.updateApptMessageStatus(messageId, status);
+    const message = (await this.chatService.updateApptMessageStatus(messageId, status));
+    if (status === AppointmentStatus.ACCEPTED) { // create a separate appointment object on accept
+      const appt = message.content as AppointmentMessage;
+      await this.appointmentService.createAppointment({
+        title: appt.title,
+        content: appt.content,
+        date: appt.date,
+        sender: message.sender,
+        recipient: client.data.user.sub,
+        message: message._id
+      });
+    } else if (status === AppointmentStatus.CANCELLED) { // cancel the separate appointment too
+      await this.appointmentService.cancelAppointmentByMessageId(message._id);
+    }
 
     const chat = await this.chatService.getChat(message.chat);
     const participants = chat.participants;
