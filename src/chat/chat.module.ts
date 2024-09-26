@@ -9,6 +9,8 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { ChatController } from './chat.controller';
 import { FirebaseModule } from 'src/firebase/firebase.module';
+import { AppointmentService } from 'src/appointment/appointment.service';
+import { AppointmentModule } from 'src/appointment/appointment.module';
 
 @Module({
   imports: [
@@ -17,6 +19,7 @@ import { FirebaseModule } from 'src/firebase/firebase.module';
       { name: Message.name, schema: MessageSchema }
     ]),
     FirebaseModule,
+    AppointmentModule,
   ],
   providers: [ChatGateway, ChatService],
   controllers: [ChatController]

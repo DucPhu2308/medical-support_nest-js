@@ -11,6 +11,7 @@ import { ChatModule } from './chat/chat.module';
 import { UserModule } from './user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { CommentModule } from './comment/comment.module';
+import { AppointmentModule } from './appointment/appointment.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { CommentModule } from './comment/comment.module';
       signOptions: { expiresIn: '7d' },
     }),
     CommentModule,
+    AppointmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -47,8 +47,10 @@ export class PostController {
     // }
 
     @Get('/search')
-    async searchPosts(@Query() query: GetPostFillterDto) {
-        return this.postService.getPostBySearch(query);
+    async searchPosts(@Query() query: GetPostFillterDto, 
+        @Query('page') page: number, @Query('limit') limit: number) {
+
+        return this.postService.getPostBySearchPagination(query, page, limit);
     }
 
     @Put('/like/:postId')

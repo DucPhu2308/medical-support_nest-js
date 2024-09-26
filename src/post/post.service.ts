@@ -74,6 +74,44 @@ export class PostService {
 
     }
 
+    async getPostBySearchPagination(filterDto: GetPostFillterDto, page: number, limit: number) {
+        const query : any = {};
+
+        if (filterDto.postId) {
+            query._id = new Types.ObjectId(filterDto.postId);
+        }
+
+        if (filterDto.userId) {
+            query.author = new Types.ObjectId(filterDto.userId);
+        }
+
+        if (filterDto.title || filterDto.content) {
+            query.$or = [];
+
+            if (filterDto.title) {
+                query.$or.push({ title: { $regex: filterDto.title, $options: 'i' } });
+            }
+
+            if (filterDto.content) {
+                query.$or.push({ content: { $regex: filterDto.content, $options: 'i' } });
+            }
+        }
+
+        
+
+        const mongoQuery = this.postModel.find(query)
+            .populate('author', MONGO_SELECT.USER.DEFAULT)
+            .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
+            .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
+            .populate('surprisedBy', MONGO_SELECT.USER.DEFAULT)
+        
+        if (page && limit) {
+            mongoQuery.skip((page - 1) * limit).limit(limit);
+        }
+
+        return mongoQuery;
+    }
+
         
 
     async likePost(postId: string, userId: string) {
