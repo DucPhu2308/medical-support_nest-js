@@ -112,4 +112,16 @@ export class ChatGateway implements OnGatewayConnection {
       this.server.to(participant.toHexString()).emit('update-message', message);
     }
   }
+
+  @SubscribeMessage('call')
+  handleCall(client: Socket, payload: { to: string, offer: any }): void {
+    console.log('call:', payload);
+    this.server.to(payload.to).emit('call', payload); // Gửi tín hiệu WebRTC
+  }
+
+  @SubscribeMessage('answer')
+  handleAnswer(client: Socket, payload: { to: string, answer: any }): void {
+    console.log('answer:', payload);
+    this.server.to(payload.to).emit('answer', payload); // Gửi tín hiệu trả lời
+  }
 }
