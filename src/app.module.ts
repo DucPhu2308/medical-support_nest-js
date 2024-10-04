@@ -16,7 +16,10 @@ import { AppointmentModule } from './appointment/appointment.module';
 @Module({
   imports: [
     AuthModule,
-    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true, cache: true }),
+    ConfigModule.forRoot({ 
+      envFilePath: process.env.NODE_ENV === 'deploy' ? '.env.deploy' : '.env', 
+      isGlobal: true, cache: true 
+    }),
     MongooseModule.forRoot(process.env.MONGO_URI),
     MailerModule.forRoot({
       transport: {
