@@ -124,4 +124,10 @@ export class ChatGateway implements OnGatewayConnection {
     console.log('answer:', payload);
     this.server.to(payload.to).emit('answer', payload); // Gửi tín hiệu trả lời
   }
+
+  @SubscribeMessage('ice-candidate')
+  handleIceCandidate(client: Socket, payload: { to: string, candidate: any }): void {
+    console.log('ice-candidate:', payload);
+    this.server.to(payload.to).emit('ice-candidate', payload); // Gửi tín hiệu ICE candidate
+  }
 }
