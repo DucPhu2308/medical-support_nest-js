@@ -7,6 +7,7 @@ import { AppointmentMessage, AppointmentStatus, MessageType } from 'src/schemas/
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
 import { MONGO_SELECT } from 'src/common/constances';
 import { AppointmentService } from 'src/appointment/appointment.service';
+import { off } from 'process';
 
 @WebSocketGateway({ 
   cors: {
@@ -111,5 +112,35 @@ export class ChatGateway implements OnGatewayConnection {
     for (const participant of participants) {
       this.server.to(participant.toHexString()).emit('update-message', message);
     }
+  }
+
+  @SubscribeMessage('call')
+  handleCall(client: Socket, payload: { to: string, offer: any }): void {
+    console.log('call:', payload);
+    this.server.to(payload.to).emit('call', payload); // Gửi tín hiệu WebRTC
+  }
+
+  @SubscribeMessage('answer')
+  handleAnswer(client: Socket, payload: { to: string, answer: any }): void {
+    console.log('answer:', payload);
+    this.server.to(payload.to).emit('answer', payload); // Gửi tín hiệu trả lời
+  }
+
+  @SubscribeMessage('nego-needed')
+  handleNegoNeeded(client: Socket, payload: { to: string, offer: any }): void {
+    console.log('nego-needed:', payload);
+    this.server.to(payload.to).emit('nego-needed', {from:  client.data.user.sub, offer: payload.offer}); // Gửi tín hiệu cần thỏa thuận
+  }
+
+  @SubscribeMessage('nego-answer')
+  handleNegoAnswer(client: Socket, payload: { to: string, answer: any }): void {
+    console.log('nego-answer:', payload);
+    this.server.to(payload.to).emit('nego-answer', {from:  client.data.user.sub, answer: payload.answer}); // Gửi tín hiệu trả lời thỏa thu
+  }
+
+  @SubscribeMessage('ice-candidate')
+  handleIceCandidate(client: Socket, payload: { to: string, candidate: any }): void {
+    console.log('ice-candidate:', payload);
+    this.server.to(payload.to).emit('ice-candidate', payload); // Gửi tín hiệu ICE candidate
   }
 }

@@ -67,7 +67,8 @@ export class ChatService {
         return await this.messageModel.find({ chat: chatId })
             .sort({ createdAt: -1 })
             .skip((page - 1) * pageSize)
-            .limit(pageSize);
+            .limit(pageSize)
+            .populate('sender', MONGO_SELECT.USER.DEFAULT);
     }
 
     async getMessages(chatId: string) {
