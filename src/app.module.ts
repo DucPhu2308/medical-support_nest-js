@@ -12,6 +12,7 @@ import { UserModule } from './user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { CommentModule } from './comment/comment.module';
 import { AppointmentModule } from './appointment/appointment.module';
+import { DoctorModule } from './doctor/doctor.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AppointmentModule } from './appointment/appointment.module';
     }),
     CommentModule,
     AppointmentModule,
+    DoctorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

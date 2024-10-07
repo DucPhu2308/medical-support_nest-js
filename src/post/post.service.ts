@@ -17,7 +17,7 @@ export class PostService {
 
     async createPost(createPostDto: CreatePostDto) {
         const files = createPostDto.images;
-
+        console.log(files);
         if (files) {
             const images = await Promise.all(
                 files.map(async (file) => {

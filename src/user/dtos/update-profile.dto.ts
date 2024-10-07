@@ -1,4 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsOptional } from "class-validator";
 
 export class UpdateProfileDto {
     @ApiProperty()
@@ -7,9 +8,11 @@ export class UpdateProfileDto {
     lastName: string;
     @ApiProperty()
     gender: boolean;
+
+    @ApiPropertyOptional({ type: 'string', format: 'binary' })
+    avatar: Express.Multer.File;
     @ApiProperty()
-    avatar: string;
-    @ApiProperty()
+    @IsOptional()
     background: string;
     @ApiProperty()
     dob: Date;

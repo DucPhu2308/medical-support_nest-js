@@ -1,16 +1,20 @@
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { DoctorInfo } from "src/schemas/doctor-info.schema";
-import { User } from "src/schemas/user.schema";
+import { User, UserRole } from "src/schemas/user.schema";
 import { CreateDoctorDto } from "./dtos/create-doctor.dto";
 import { create } from "domain";
 import * as bcrypt from 'bcrypt';
+import { ORG_NAME } from 'src/common/constances';
+import { MailerService } from "@nestjs-modules/mailer";
+import { Injectable } from "@nestjs/common";
 
-
+@Injectable()
 export class DoctorService {
     constructor(
         @InjectModel(User.name) private userModel: Model<User>,
-        @InjectModel(DoctorInfo.name) private doctorModel: Model<DoctorInfo>
+        @InjectModel(DoctorInfo.name) private doctorModel: Model<DoctorInfo>,
+        private readonly mailerService: MailerService
     ) { }
 
     async createDoctor(createDoctorDto: CreateDoctorDto) {
@@ -24,15 +28,25 @@ export class DoctorService {
             specialty: createDoctorDto.specialty
         });
 
+        var password = this.autoCreatePassword();
+
         const newDoctor = await this.userModel.create({
             email: createDoctorDto.email,
             dob: createDoctorDto.dob,
             firstName: createDoctorDto.firstName,
             lastName: createDoctorDto.lastName,
             doctorInfo: doctorInfo._id,
-            password: await bcrypt.hash(this.autoCreatePassword(), 10)
+            isActive: true,
+            roles:[UserRole.DOCTOR],
+            password: await bcrypt.hash(password, 10)
 
         })
+
+        await this.mailerService.sendMail({
+            to: createDoctorDto.email,
+            subject: `[${ORG_NAME}] Tài khoản đã được cấp`,
+            text: `Mật khẩu tài khoản: ${password}`,
+        });
 
         return newDoctor;
     }

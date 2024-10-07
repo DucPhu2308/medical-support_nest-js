@@ -22,6 +22,7 @@ export class PostController {
     @UseGuards(AuthGuard)
     @UseInterceptors(FilesInterceptor('images'))
     @ApiConsumes('multipart/form-data')
+    @ApiBearerAuth()
     async createPost(@Body() createPostDto: CreatePostDto, @Request() req,
         @UploadedFiles() files: Array<Express.Multer.File>) {
         createPostDto.author = req.user.sub;

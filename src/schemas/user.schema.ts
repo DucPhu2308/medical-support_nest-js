@@ -11,7 +11,7 @@ export enum UserRole {
     ADMIN = 'ADMIN'
 }
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class User extends BaseSchema {
     @Prop()
     firstName: string;
@@ -35,10 +35,12 @@ export class User extends BaseSchema {
     activeCode: string;
     @Prop({ default: false })
     isActive: boolean;
-    @Prop({ type: [{ type: String, enum: UserRole}], default: [UserRole.CLIENT] })
+    @Prop({ type: [{ type: String, enum: UserRole }], default: [UserRole.CLIENT] })
     roles: string[];
-    @Prop({ type: DoctorInfo})
-    doctorInfo: DoctorInfo; 
+    @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'User' })
+    following: mongoose.Types.ObjectId[];
+    @Prop({ type: DoctorInfo })
+    doctorInfo: DoctorInfo;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
