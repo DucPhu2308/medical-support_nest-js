@@ -5,6 +5,7 @@ import { User, UserDocument } from "src/schemas/user.schema";
 export class UserResponse {
     constructor(user: User) {
         this._id = user._id;
+        this.avatar = user.avatar;
         this.firstName = user.firstName;
         this.lastName = user.lastName;
         this.email = user.email;
@@ -17,6 +18,7 @@ export class UserResponse {
         this.roles = user.roles;
     }
     _id: Types.ObjectId;
+    avatar: string;
     firstName: string;
     lastName: string;
     email: string;

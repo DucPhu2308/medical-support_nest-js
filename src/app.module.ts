@@ -13,6 +13,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { CommentModule } from './comment/comment.module';
 import { AppointmentModule } from './appointment/appointment.module';
 import { DoctorModule } from './doctor/doctor.module';
+import { SpectialityModule } from './department/department.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { DoctorModule } from './doctor/doctor.module';
     CommentModule,
     AppointmentModule,
     DoctorModule,
+    SpectialityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
