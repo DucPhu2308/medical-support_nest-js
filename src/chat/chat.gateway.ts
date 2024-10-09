@@ -143,4 +143,10 @@ export class ChatGateway implements OnGatewayConnection {
     console.log('ice-candidate:', payload);
     this.server.to(payload.to).emit('ice-candidate', payload); // Gửi tín hiệu ICE candidate
   }
+
+  @SubscribeMessage('end-call')
+  handleEndCall(client: Socket, payload: { to: string }): void {
+    console.log('end-call:', payload.to);
+    this.server.to(payload.to).emit('end-call', payload); // Gửi tín hiệu kết thúc cuộc gọi
+  }
 }
