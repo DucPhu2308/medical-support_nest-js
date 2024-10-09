@@ -5,9 +5,11 @@ import { Speciality } from "./speciality.schema";
 @Schema()
 export class DoctorInfo {
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Speciality' }] })
-    specialities: Types.ObjectId[];
+    specialities: mongoose.Types.ObjectId;
     @Prop()
     phone: string;
+    @Prop({ default: false })
+    isPermission: boolean;
 }
 
 export const DoctorInfoSchema = SchemaFactory.createForClass(DoctorInfo);

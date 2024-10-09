@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty, IsOptional } from "class-validator";
 
 
 
@@ -26,5 +26,15 @@ export class CreateDoctorDto {
 
     @ApiProperty()
     @IsNotEmpty()
+    gender: boolean;
+
+    @ApiProperty()
+    @IsNotEmpty()
     specialty: string;
+
+    @ApiProperty({ type: 'string', format: 'binary' })
+    @IsOptional()
+    avatar: Express.Multer.File;
+
+
 }

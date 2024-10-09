@@ -1,5 +1,5 @@
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { DoctorInfo } from "src/schemas/doctor-info.schema";
 import { User, UserRole } from "src/schemas/user.schema";
 import { CreateDoctorDto } from "./dtos/create-doctor.dto";
@@ -8,39 +8,69 @@ import * as bcrypt from 'bcrypt';
 import { ORG_NAME } from 'src/common/constances';
 import { MailerService } from "@nestjs-modules/mailer";
 import { Injectable } from "@nestjs/common";
+import { FirebaseService, UploadFolder } from "src/firebase/firebase.service";
+import { Speciality } from "src/schemas/speciality.schema";
+import { PermissionDoctorDto } from "./dtos/permission-doctor.dto";
 
 @Injectable()
 export class DoctorService {
     constructor(
         @InjectModel(User.name) private userModel: Model<User>,
         @InjectModel(DoctorInfo.name) private doctorModel: Model<DoctorInfo>,
-        private readonly mailerService: MailerService
+        @InjectModel(Speciality.name) private specialityModel: Model<Speciality>,
+        private readonly mailerService: MailerService,
+        private readonly firebaseService: FirebaseService,
     ) { }
+
+    async findAllDoctors() {
+        return this.userModel.find({ roles: UserRole.DOCTOR }).select('firstName lastName email gender dob avatar doctorInfo').populate('doctorInfo', 'specialities phone isPermission').populate('doctorInfo.specialities', 'name');
+    }
 
     async createDoctor(createDoctorDto: CreateDoctorDto) {
         const currentDoctor = await this.userModel.findOne({ email: createDoctorDto.email });
         if (currentDoctor) {
             throw new Error('Doctor already exists');
+            return;
         }
 
+        const specialities = await this.specialityModel.findById(createDoctorDto.specialty);
         const doctorInfo = await this.doctorModel.create({
+            specialities: [specialities._id],
             phone: createDoctorDto.phone,
-            specialty: createDoctorDto.specialty
+            isPermission: false,
         });
 
-        var password = this.autoCreatePassword();
 
-        const newDoctor = await this.userModel.create({
+        const newDoctorInfo = await doctorInfo.save();
+
+        var password = this.autoCreatePassword();
+        const newDoctor = {
             email: createDoctorDto.email,
             dob: createDoctorDto.dob,
             firstName: createDoctorDto.firstName,
             lastName: createDoctorDto.lastName,
-            doctorInfo: doctorInfo._id,
+            doctorInfo: {
+                _id: newDoctorInfo._id,
+                specialities: newDoctorInfo.specialities,
+                phone: newDoctorInfo.phone,
+                isPermission: newDoctorInfo.isPermission,
+            },
+            gender: createDoctorDto.gender,
             isActive: true,
             roles:[UserRole.DOCTOR],
-            password: await bcrypt.hash(password, 10)
+            password: await bcrypt.hash(password, 10),
+            avatar: '',
 
-        })
+        };
+        
+        const file = createDoctorDto.avatar;
+        if (file) {
+            const avatar = await this.firebaseService.uploadFile(file, UploadFolder.POST);
+            newDoctor.avatar = avatar;
+        }
+
+        const user = await this.userModel.create(newDoctor);
+        await user.save();
 
         await this.mailerService.sendMail({
             to: createDoctorDto.email,
@@ -59,6 +89,28 @@ export class DoctorService {
             password += chars[randomIndex];
         }
         return password;
+    }
+
+    async updateDoctorPermission(permissionDoctorDto: PermissionDoctorDto) {
+        const doctor = await this.userModel.findById(permissionDoctorDto.doctorId);
+        if (!doctor) {
+            throw new Error('Doctor not found');
+        }
+
+        return this.userModel.findByIdAndUpdate(
+            permissionDoctorDto.doctorId,
+            {
+                $set: {
+                    'doctorInfo.isPermission': permissionDoctorDto.isPermission,
+                },
+            },
+            { new: true },
+        );
+
+        
+
+
+        
     }
 
 }
