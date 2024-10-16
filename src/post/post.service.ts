@@ -6,13 +6,16 @@ import { CreatePostDto } from './dtos/create-post.dto';
 import { MONGO_SELECT } from 'src/common/constances';
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
 import { GetPostFillterDto } from './dtos/get-post-fillter.dto';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectModel(Post.name) private postModel: Model<Post>,
         private readonly firebaseService: FirebaseService,
-        
+        private readonly notificationService: NotificationService,
     ) { }
 
     async createPost(createPostDto: CreatePostDto) {
@@ -32,7 +35,7 @@ export class PostService {
         } else {
             return await this.postModel.create(createPostDto);
         }
-        
+
     }
 
     async getAllPosts() {
@@ -75,7 +78,7 @@ export class PostService {
     }
 
     async getPostBySearchPagination(filterDto: GetPostFillterDto, page: number, limit: number) {
-        const query : any = {};
+        const query: any = {};
 
         if (filterDto.postId) {
             query._id = new Types.ObjectId(filterDto.postId);
@@ -97,14 +100,14 @@ export class PostService {
             }
         }
 
-        
+
 
         const mongoQuery = this.postModel.find(query)
             .populate('author', MONGO_SELECT.USER.DEFAULT)
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('surprisedBy', MONGO_SELECT.USER.DEFAULT)
-        
+
         if (page && limit) {
             mongoQuery.skip((page - 1) * limit).limit(limit);
         }
@@ -112,7 +115,7 @@ export class PostService {
         return mongoQuery;
     }
 
-        
+
 
     async likePost(postId: string, userId: string) {
         const post = await this.postModel.findById(postId);
@@ -162,6 +165,10 @@ export class PostService {
             post.lovedBy.push(new Types.ObjectId(userId));
         } else if (reactionType === 'surprise') {
             post.surprisedBy.push(new Types.ObjectId(userId));
+        }
+
+        if (reactionType && userId !== post.author.toString()) {
+            this.notificationService.pushReactPostNotificationToQueue(userId, postId);
         }
 
         await post.save();

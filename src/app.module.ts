@@ -14,6 +14,8 @@ import { CommentModule } from './comment/comment.module';
 import { AppointmentModule } from './appointment/appointment.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { SpectialityModule } from './department/department.module';
+import { NotificationModule } from './notification/notification.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -45,6 +47,15 @@ import { SpectialityModule } from './department/department.module';
     AppointmentModule,
     DoctorModule,
     SpectialityModule,
+
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST,
+        port: parseInt(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+      },
+    }),
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
