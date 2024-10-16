@@ -6,6 +6,9 @@ import { CreatePostDto } from './dtos/create-post.dto';
 import { MONGO_SELECT } from 'src/common/constances';
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
 import { GetPostFillterDto } from './dtos/get-post-fillter.dto';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { NotificationService } from 'src/notification/notification.service';
 import { types } from 'util';
 import { Speciality } from 'src/schemas/speciality.schema';
 
@@ -15,7 +18,8 @@ export class PostService {
         @InjectModel(Post.name) private postModel: Model<Post>,
         @InjectModel(Speciality.name) private specialityModel: Model<Speciality>,
         private readonly firebaseService: FirebaseService,
-
+        private readonly notificationService: NotificationService,
+        
     ) { }
 
     async createPost(createPostDto: CreatePostDto) {
@@ -57,6 +61,7 @@ export class PostService {
                 tags,  // Lưu tags đã chuyển đổi
             });
         }
+        
     }
     
 
@@ -187,6 +192,10 @@ export class PostService {
             post.lovedBy.push(new Types.ObjectId(userId));
         } else if (reactionType === 'surprise') {
             post.surprisedBy.push(new Types.ObjectId(userId));
+        }
+
+        if (reactionType && userId !== post.author.toString()) {
+            this.notificationService.pushReactPostNotificationToQueue(userId, postId);
         }
 
         await post.save();
