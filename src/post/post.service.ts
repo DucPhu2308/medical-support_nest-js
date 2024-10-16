@@ -27,21 +27,16 @@ export class PostService {
     
         // Tạo mảng tags dạng ObjectId nếu đầu vào hợp lệ
         let tags: Types.ObjectId[] = [];
-        console.log(createPostDto.tags);
     
         if (createPostDto.tags) {
-            for(let i = 0; i < createPostDto.tags.length; i++) {
-                const tagId = createPostDto.tags[i];
-                const tag = await this.specialityModel.findById(tagId);
-                if (!tag) {
-                    throw new Error('Tag not found');
+            createPostDto.tags.forEach(async (tag) => {
+                const speciality = await this.specialityModel.findById(tag);
+                if (speciality) {
+                    tags.push(new Types.ObjectId(tag));
                 }
-                tags.push(new Types.ObjectId(tagId));
-            }
-                
+
+            }); 
         }
-    
-        console.log("abc: ", tags);
     
         if (files) {
             const images = await Promise.all(
@@ -52,13 +47,13 @@ export class PostService {
     
             return await this.postModel.create({
                 ...createPostDto,
-                tags,  // Lưu tags đã chuyển đổi
+                tags: tags,  // Lưu tags đã chuyển đổi
                 images,
             });
         } else {
             return await this.postModel.create({
                 ...createPostDto,
-                tags,  // Lưu tags đã chuyển đổi
+                tags: tags,  // Lưu tags đã chuyển đổi
             });
         }
         
