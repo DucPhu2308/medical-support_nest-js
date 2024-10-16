@@ -6,34 +6,59 @@ import { CreatePostDto } from './dtos/create-post.dto';
 import { MONGO_SELECT } from 'src/common/constances';
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
 import { GetPostFillterDto } from './dtos/get-post-fillter.dto';
+import { types } from 'util';
+import { Speciality } from 'src/schemas/speciality.schema';
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectModel(Post.name) private postModel: Model<Post>,
+        @InjectModel(Speciality.name) private specialityModel: Model<Speciality>,
         private readonly firebaseService: FirebaseService,
-        
+
     ) { }
 
     async createPost(createPostDto: CreatePostDto) {
         const files = createPostDto.images;
-        console.log(files);
+    
+        // Tạo mảng tags dạng ObjectId nếu đầu vào hợp lệ
+        let tags: Types.ObjectId[] = [];
+        console.log(createPostDto.tags);
+    
+        if (createPostDto.tags) {
+            for(let i = 0; i < createPostDto.tags.length; i++) {
+                const tagId = createPostDto.tags[i];
+                const tag = await this.specialityModel.findById(tagId);
+                if (!tag) {
+                    throw new Error('Tag not found');
+                }
+                tags.push(new Types.ObjectId(tagId));
+            }
+                
+        }
+    
+        console.log("abc: ", tags);
+    
         if (files) {
             const images = await Promise.all(
                 files.map(async (file) => {
                     return await this.firebaseService.uploadFile(file, UploadFolder.POST);
                 })
             );
-
+    
             return await this.postModel.create({
                 ...createPostDto,
+                tags,  // Lưu tags đã chuyển đổi
                 images,
             });
         } else {
-            return await this.postModel.create(createPostDto);
+            return await this.postModel.create({
+                ...createPostDto,
+                tags,  // Lưu tags đã chuyển đổi
+            });
         }
-        
     }
+    
 
     async getAllPosts() {
         return await this.postModel.find()
@@ -48,7 +73,7 @@ export class PostService {
     }
 
     async getPostBySearch(filterDto: GetPostFillterDto) {
-        const query : any = {};
+        const query: any = {};
 
         if (filterDto.postId) {
             query._id = new Types.ObjectId(filterDto.postId);
@@ -75,7 +100,7 @@ export class PostService {
     }
 
     async getPostBySearchPagination(filterDto: GetPostFillterDto, page: number, limit: number) {
-        const query : any = {};
+        const query: any = {};
 
         if (filterDto.postId) {
             query._id = new Types.ObjectId(filterDto.postId);
@@ -97,14 +122,14 @@ export class PostService {
             }
         }
 
-        
+
 
         const mongoQuery = this.postModel.find(query)
             .populate('author', MONGO_SELECT.USER.DEFAULT)
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('surprisedBy', MONGO_SELECT.USER.DEFAULT)
-        
+
         if (page && limit) {
             mongoQuery.skip((page - 1) * limit).limit(limit);
         }
@@ -112,7 +137,7 @@ export class PostService {
         return mongoQuery;
     }
 
-        
+
 
     async likePost(postId: string, userId: string) {
         const post = await this.postModel.findById(postId);
