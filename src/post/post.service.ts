@@ -95,8 +95,8 @@ export class PostService {
             .populate('author', MONGO_SELECT.USER.DEFAULT)
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
-            .populate('surprisedBy', MONGO_SELECT.USER.DEFAULT);
-
+            .populate('surprisedBy', MONGO_SELECT.USER.DEFAULT)
+            .populate('tags', MONGO_SELECT.SPECIALITY.DEFAULT);
     }
 
     async getPostBySearchPagination(filterDto: GetPostFillterDto, page: number, limit: number) {
@@ -129,6 +129,7 @@ export class PostService {
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('surprisedBy', MONGO_SELECT.USER.DEFAULT)
+            .populate('tags', MONGO_SELECT.SPECIALITY.DEFAULT)
 
         if (page && limit) {
             mongoQuery.skip((page - 1) * limit).limit(limit);
