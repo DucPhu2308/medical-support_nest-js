@@ -15,7 +15,7 @@ export class Post extends BaseSchema {
     author: Types.ObjectId;
     @Prop({ type: [String]})
     images: string[];
-    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Speciality' }]})
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Speciality' }] })
     tags: Types.ObjectId[];
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }]})
     comments: Types.ObjectId[];

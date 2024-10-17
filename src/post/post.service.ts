@@ -19,25 +19,33 @@ export class PostService {
         @InjectModel(Speciality.name) private specialityModel: Model<Speciality>,
         private readonly firebaseService: FirebaseService,
         private readonly notificationService: NotificationService,
-        
+
     ) { }
 
     async createPost(createPostDto: CreatePostDto) {
         const files = createPostDto.images;
     
-        // Tạo mảng tags dạng ObjectId nếu đầu vào hợp lệ
+        // Initialize the tags array
         let tags: Types.ObjectId[] = [];
     
-        if (createPostDto.tags) {
-            createPostDto.tags.forEach(async (tag) => {
-                const speciality = await this.specialityModel.findById(tag);
-                if (speciality) {
-                    tags.push(new Types.ObjectId(tag));
-                }
-
-            }); 
+        // Ensure tags is always an array (even if a single tag is provided)
+        const tagInput = Array.isArray(createPostDto.tags) ? createPostDto.tags : [createPostDto.tags];
+    
+        // Process tags asynchronously
+        if (tagInput && tagInput.length > 0) {
+            tags = await Promise.all(
+                tagInput.map(async (tag) => {
+                    const speciality = await this.specialityModel.findById(tag);
+                    if (speciality) {
+                        return new Types.ObjectId(tag);
+                    }
+                })
+            );
+            // Filter out undefined values from tags array
+            tags = tags.filter(tag => tag !== undefined);
         }
     
+        // If there are images, upload them
         if (files) {
             const images = await Promise.all(
                 files.map(async (file) => {
@@ -45,20 +53,22 @@ export class PostService {
                 })
             );
     
+            // Save the post with both images and tags (if any)
             return await this.postModel.create({
                 ...createPostDto,
-                tags: tags,  // Lưu tags đã chuyển đổi
-                images,
+                tags,  // Save tags (if any)
+                images,  // Save images
             });
         } else {
+            // Save the post without images but with tags (if any)
             return await this.postModel.create({
                 ...createPostDto,
-                tags: tags,  // Lưu tags đã chuyển đổi
+                tags,  // Save tags (if any)
             });
         }
-        
     }
     
+
 
     async getAllPosts() {
         return await this.postModel.find()
@@ -129,7 +139,7 @@ export class PostService {
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('surprisedBy', MONGO_SELECT.USER.DEFAULT)
-            .populate('tags', MONGO_SELECT.SPECIALITY.DEFAULT)
+            .populate('tags', MONGO_SELECT.SPECIALITY.DEFAULT);
 
         if (page && limit) {
             mongoQuery.skip((page - 1) * limit).limit(limit);
