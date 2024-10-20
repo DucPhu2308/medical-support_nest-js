@@ -5,6 +5,7 @@ import mongoose, { HydratedDocument, Mongoose, Types } from "mongoose";
 export enum NotificationType {
     POST_REACT = 'post_like',
     POST_COMMENT = 'post_comment',
+    APPOINTMENT_REMINDER = 'appointment_reminder',
 }
 
 @Schema({ timestamps: true })

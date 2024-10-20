@@ -8,6 +8,7 @@ import { BullModule } from '@nestjs/bull';
 import { Post, PostSchema } from 'src/schemas/post.schema';
 import { User, UserSchema } from 'src/schemas/user.schema';
 import { NotificationProcessor } from './notification.processor';
+import { Appointment, AppointmentSchema } from 'src/schemas/appointment.schema';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { NotificationProcessor } from './notification.processor';
       { name: Notification.name, schema: NotificationSchema },
       { name: Post.name, schema: PostSchema },
       { name: User.name, schema: UserSchema },
+      { name: Appointment.name, schema: AppointmentSchema },
     ]),
     BullModule.registerQueue({
       name: 'notification',

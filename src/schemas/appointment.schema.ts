@@ -19,6 +19,8 @@ export class Appointment {
     status: AppointmentStatus;
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Message' })
     message: Types.ObjectId;
+    @Prop()
+    reminderJobId: string;
 }
 
 export const AppointmentSchema = SchemaFactory.createForClass(Appointment);

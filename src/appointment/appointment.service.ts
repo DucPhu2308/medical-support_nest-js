@@ -6,19 +6,26 @@ import { CreateAppointmentDto } from './dtos/create-appt.dto';
 import { AppointmentStatus } from 'src/schemas/message.schema';
 import { MONGO_SELECT } from 'src/common/constances';
 import { GetApptFilterDto } from './dtos/get-appt-filter.dto';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class AppointmentService {
-    constructor(@InjectModel(Appointment.name) private appointmentModel: Model<Appointment>) { }
+    constructor(
+        @InjectModel(Appointment.name) private appointmentModel: Model<Appointment>,
+        private readonly notificationService: NotificationService,
+    ) { }
 
     async createAppointment(appointment: CreateAppointmentDto) {
-        return await this.appointmentModel.create(appointment);
+        const appt = await this.appointmentModel.create(appointment);
+        this.notificationService.scheduleAppointmentReminder(appt._id.toHexString());
+        return appt;
     }
     async cancelAppointmentByMessageId(messageId: string | Types.ObjectId) {
         const appointment = await this.appointmentModel.findOne({ message: new Types.ObjectId(messageId) });
         if (!appointment) {
             return null;
         }
+        this.notificationService.cancelAppointmentReminder(appointment._id.toHexString());
         appointment.status = AppointmentStatus.CANCELLED;
         return await appointment.save();
     }
