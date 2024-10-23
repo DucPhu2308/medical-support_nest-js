@@ -11,12 +11,16 @@ import { Queue } from 'bull';
 import { NotificationService } from 'src/notification/notification.service';
 import { types } from 'util';
 import { Speciality } from 'src/schemas/speciality.schema';
+import { UpdatePostDto } from './dtos/update-post.dto';
+import { User } from 'src/schemas/user.schema';
+import { Console } from 'console';
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectModel(Post.name) private postModel: Model<Post>,
         @InjectModel(Speciality.name) private specialityModel: Model<Speciality>,
+        @InjectModel(User.name) private userModel: Model<User>,
         private readonly firebaseService: FirebaseService,
         private readonly notificationService: NotificationService,
 
@@ -24,13 +28,13 @@ export class PostService {
 
     async createPost(createPostDto: CreatePostDto) {
         const files = createPostDto.images;
-    
+
         // Initialize the tags array
         let tags: Types.ObjectId[] = [];
-    
+
         // Ensure tags is always an array (even if a single tag is provided)
         const tagInput = Array.isArray(createPostDto.tags) ? createPostDto.tags : [createPostDto.tags];
-    
+
         // Process tags asynchronously
         if (tagInput && tagInput.length > 0) {
             tags = await Promise.all(
@@ -44,7 +48,7 @@ export class PostService {
             // Filter out undefined values from tags array
             tags = tags.filter(tag => tag !== undefined);
         }
-    
+
         // If there are images, upload them
         if (files) {
             const images = await Promise.all(
@@ -52,7 +56,7 @@ export class PostService {
                     return await this.firebaseService.uploadFile(file, UploadFolder.POST);
                 })
             );
-    
+
             // Save the post with both images and tags (if any)
             return await this.postModel.create({
                 ...createPostDto,
@@ -67,7 +71,7 @@ export class PostService {
             });
         }
     }
-    
+
 
 
     async getAllPosts() {
@@ -206,6 +210,38 @@ export class PostService {
 
         await post.save();
         return { message: `Post ${reactionType}d successfully` };
+    }
+
+    async updatePost(postId: string, userId: string, updatePostDto: UpdatePostDto) {
+        const post = await this.postModel.findById(postId);
+        if (!post) {
+            throw new Error('Post not found');
+        }
+        let check = false;
+        console.log(userId);
+        const authorPublished = await this.userModel.findById(userId);
+        if (authorPublished.roles.includes('DOCTOR')) {
+            for (let i = 0; i < post.tags.length; i++) {
+                const speciality = await this.specialityModel.findById(post.tags[i]);
+                if (authorPublished.doctorInfo.specialities[0]._id.toString() === speciality._id.toString()) {
+                    post.publishedBy = new Types.ObjectId(userId);
+                    check = true;
+                    break;
+                }
+            }
+        }
+        if (!check) {
+            throw new Error('Unauthorized');
+        }
+        else {
+            if (updatePostDto.isPublished) {
+                post.isPublished = updatePostDto.isPublished;
+            }
+            await post.save();
+
+            return post;
+        }
+
     }
 
     async deletePost(postId: string, userId: string) {

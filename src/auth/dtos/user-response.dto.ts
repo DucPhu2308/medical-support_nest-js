@@ -1,5 +1,6 @@
 import { Expose } from "class-transformer";
 import mongoose, { Types } from "mongoose";
+import { DoctorInfo } from "src/schemas/doctor-info.schema";
 import { User, UserDocument } from "src/schemas/user.schema";
 
 export class UserResponse {
@@ -16,6 +17,7 @@ export class UserResponse {
         this.isActive = user.isActive;
         this.bio = user.bio;
         this.roles = user.roles;
+        this.doctorInfo = user.doctorInfo;
     }
     _id: Types.ObjectId;
     avatar: string;
@@ -29,4 +31,5 @@ export class UserResponse {
     updatedAt: Date;
     isActive: boolean;
     roles: string[];
+    doctorInfo: DoctorInfo;
 }
