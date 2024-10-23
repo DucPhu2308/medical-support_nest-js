@@ -54,6 +54,7 @@ export class AppointmentService {
             ...query
         })
         .populate('sender', MONGO_SELECT.USER.DEFAULT)
-        .populate('recipient', MONGO_SELECT.USER.DEFAULT);
+        .populate('recipient', MONGO_SELECT.USER.DEFAULT)
+        .sort({ date: 1 });
     }
 }
