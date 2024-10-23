@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Queue } from 'bull';
 import { Model } from 'mongoose';
 import { Appointment } from 'src/schemas/appointment.schema';
+import { Comment } from 'src/schemas/comment.schema';
 import { Notification, NotificationType } from 'src/schemas/notification.schema';
 import { Post } from 'src/schemas/post.schema';
 import { User } from 'src/schemas/user.schema';
@@ -19,36 +20,99 @@ export class NotificationService {
     ) {}
 
     async getNotifications(userId: string) {
-        return this.notificationModel.find({ recipient: userId }).sort({ updatedAt: -1 });
+        return this.notificationModel
+            .find({ recipient: userId })
+            .limit(10)
+            .sort({ updatedAt: -1 });
+    }
+    
+    async markAsRead(notificationId: string[], userId: string) {
+        await this.notificationModel.updateMany({ _id: { $in: notificationId } }, { isRead: true });
+        return this.getNotifications(userId);
     }
 
     async createOrUpdateReactPostNotification(userId: string, postId: string) {
-        const post = await this.postModel.findById(postId);
-        const user = await this.userModel.findById(userId);
+        const [post, user] = await Promise.all([
+            this.postModel.findById(postId),
+            this.userModel.findById(userId)
+        ]);
 
         const notification = await this.notificationModel.findOne({
             directObject: postId,
             type: NotificationType.POST_REACT,
+        }) || new this.notificationModel();
+    
+        const totalSubjects = post.likedBy.length + post.lovedBy.length + post.surprisedBy.length;
+        const content = `${user.lastName}${totalSubjects > 1 ? ` và ${totalSubjects - 1} người khác` : ''} đã bày tỏ cảm xúc với bài viết của bạn`;
+    
+        notification.content = content;
+        notification.imageUrl = user.avatar;
+        notification.isRead = false;
+        notification.directObject = postId;
+        notification.type = NotificationType.POST_REACT;
+        notification.recipient = post.author;
+        notification.actionUrl = `/post/${postId}`;
+    
+        return notification.save();
+    }
+
+    async createOrUpdateCommentPostNotification(userId: string, postId: string) {
+        const [post, user] = await Promise.all([
+            this.postModel.findById(postId),
+            this.userModel.findById(userId)
+        ]);
+
+        const notification = await this.notificationModel.findOne({
+            directObject: postId,
+            type: NotificationType.POST_COMMENT,
+        }) || new this.notificationModel();
+    
+        const totalSubjects = post.comments.length;
+        const content = `${user.lastName}${totalSubjects > 1 ? ` và ${totalSubjects - 1} người khác` : ''} đã bình luận về bài viết của bạn`;
+    
+        notification.content = content;
+        notification.imageUrl = user.avatar;
+        notification.isRead = false;
+        notification.directObject = postId;
+        notification.type = NotificationType.POST_COMMENT;
+        notification.recipient = post.author;
+        notification.actionUrl = `/post/${postId}`;
+    
+        return notification.save();
+
+    }
+
+    async createOrUpdateReplyCommentNotification(userId: string, comment: Comment) {
+        const [post, user] = await Promise.all([
+            this.postModel.findById(comment.postId),
+            this.userModel.findById(userId),
+        ]);
+
+        const notification = await this.notificationModel.findOne({
+            directObject: comment._id,
+            type: NotificationType.REPLY_COMMENT,
         });
-        
 
         if (notification) {
             // notification.subjects.push(userId);
-            const totalSubjects = post.likedBy.length + post.lovedBy.length + post.surprisedBy.length;
+            const totalSubjects = post.comments.length;
             // notification.content = `${user.lastName} ${totalSubjects > 1 ? `và ${totalSubject}` : ''} đã bày tỏ cảm xúc với bài viết của bạn`;
             let content = user.lastName;
             if (totalSubjects > 1) {
                 content += ` và ${totalSubjects - 1} người khác`;
             }
-            content += ' đã bày tỏ cảm xúc với bài viết của bạn';
+            content += ' đã trả lời bình luận của bạn';
             notification.content = content;
+            notification.imageUrl = user.avatar;
+            notification.isRead = false;
             return notification.save();
         } else {
             const newNoti = await this.notificationModel.create({
-                content: `${user.lastName} đã bày tỏ cảm xúc với bài viết của bạn`,
-                type: NotificationType.POST_REACT,
+                content: `${user.lastName} đã trả lời bình luận của bạn`,
+                type: NotificationType.REPLY_COMMENT,
                 recipient: post.author,
-                actionUrl: `/post/${postId}`,
+                actionUrl: `/post/${post._id}`,
+                imageUrl: user.avatar,
             });
             return newNoti;
         }
@@ -56,6 +120,10 @@ export class NotificationService {
 
     async pushReactPostNotificationToQueue(userId: string, postId: string) {
         await this.notificationQueue.add('react-post-notification', { userId, postId });
+    }
+
+    async pushCommentPostNotificationToQueue(userId: string, postId: string) {
+        await this.notificationQueue.add('comment-post-notification', { userId, postId });
     }
 
     async scheduleAppointmentReminder(appointmentId: string) {
@@ -93,6 +161,7 @@ export class NotificationService {
             type: NotificationType.APPOINTMENT_REMINDER,
             recipient: appointment.sender,
             actionUrl: `/appointment/${appointmentId}`,
+            imageUrl: user2.avatar,
         });
 
         const notification2 = this.notificationModel.create({
@@ -100,6 +169,7 @@ export class NotificationService {
             type: NotificationType.APPOINTMENT_REMINDER,
             recipient: appointment.recipient,
             actionUrl: `/appointment/${appointmentId}`,
+            imageUrl: user1.avatar,
         });
 
         return await Promise.all([notification1, notification2]);

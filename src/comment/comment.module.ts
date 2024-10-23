@@ -5,6 +5,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { Comment, CommentSchema } from "src/schemas/comment.schema";
 import { Post, PostSchema } from "src/schemas/post.schema";
 import { User, UserSchema } from "src/schemas/user.schema";
+import { NotificationModule } from "src/notification/notification.module";
 
 
 @Module({
@@ -14,6 +15,7 @@ import { User, UserSchema } from "src/schemas/user.schema";
             { name: Post.name, schema:PostSchema },
             { name: User.name, schema:UserSchema }
         ]),
+        NotificationModule
     ],
     controllers: [CommentController],
     providers: [CommentService],

@@ -10,7 +10,6 @@ export class AppointmentController {
     @Get()
     @UseGuards(AuthGuard)
     async getAppointmentByUserId(@Req() req, @Query() filter: GetApptFilterDto) {
-        console.log('filter', filter);
         return await this.appointmentService.getAppointmentByUserId(req.user.sub, filter);
     }
 }
