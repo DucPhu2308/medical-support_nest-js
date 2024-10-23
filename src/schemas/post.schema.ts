@@ -19,6 +19,12 @@ export class Post extends BaseSchema {
     tags: Types.ObjectId[];
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }]})
     comments: Types.ObjectId[];
+    @Prop({type: Boolean, default: false})
+    isPublished: boolean;
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
+    publishedBy: Types.ObjectId;
+    @Prop({type: Boolean, default: false})
+    isDeleted: boolean;
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
     likedBy: Types.ObjectId[];
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })

@@ -5,6 +5,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
 import { GetPostFillterDto } from './dtos/get-post-fillter.dto';
+import { UpdatePostDto } from './dtos/update-post.dto';
 
 enum ReactionType {
     LIKE = 'like',
@@ -89,6 +90,13 @@ export class PostController {
         const userId = req.user.sub;
         return this.postService.handleReaction(postId, userId, body.type);
     }
+
+    @Put('/:postId')
+    @UseGuards(AuthGuard)
+    async updatePost(@Request() req, @Param('postId') postId: string, @Body() updatePostDto: UpdatePostDto) {
+        return this.postService.updatePost(postId, req.user.sub, updatePostDto);
+    }
+
 
     @Delete('/:postId')
     @UseGuards(AuthGuard)
