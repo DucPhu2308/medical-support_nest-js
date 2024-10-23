@@ -3,6 +3,7 @@ import { AppointmentService } from './appointment.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Appointment, AppointmentSchema } from 'src/schemas/appointment.schema';
 import { AppointmentController } from './appointment.controller';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { AppointmentController } from './appointment.controller';
         schema: AppointmentSchema,
       },
     ]),
+    NotificationModule,
   ],
   providers: [AppointmentService],
   exports: [AppointmentService],
