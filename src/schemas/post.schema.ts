@@ -5,6 +5,13 @@ import { CommentDocument } from "./comment.schema";
 import { User } from "./user.schema";
 import { Speciality } from "./speciality.schema";
 
+export enum PostStatus {
+    PENDING = 'PENDING',
+    PUBLISHED = 'PUBLISHED',
+    REJECTED = 'REJECTED'
+}
+
+
 @Schema({timestamps: true})
 export class Post extends BaseSchema {
     @Prop({ required: true })
@@ -19,8 +26,8 @@ export class Post extends BaseSchema {
     tags: Types.ObjectId[];
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }]})
     comments: Types.ObjectId[];
-    @Prop({type: Boolean, default: false})
-    isPublished: boolean;
+    @Prop({type: String, enum: PostStatus, default: PostStatus.PENDING})
+    status: string;
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
     publishedBy: Types.ObjectId;
     @Prop({type: Boolean, default: false})

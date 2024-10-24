@@ -234,8 +234,8 @@ export class PostService {
             throw new Error('Unauthorized');
         }
         else {
-            if (updatePostDto.isPublished) {
-                post.isPublished = updatePostDto.isPublished;
+            if (updatePostDto.status) {
+                post.status = updatePostDto.status;
             }
             await post.save();
 

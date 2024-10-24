@@ -25,7 +25,7 @@ export class UpdatePostDto {
 
     @ApiPropertyOptional()
     @IsOptional()
-    isPublished: boolean;
+    status: string;
 
     // @ApiPropertyOptional()
     // @IsOptional()
