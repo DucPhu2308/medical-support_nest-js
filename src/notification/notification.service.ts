@@ -67,8 +67,7 @@ export class NotificationService {
             type: NotificationType.POST_COMMENT,
         }) || new this.notificationModel();
     
-        const totalSubjects = post.comments.length;
-        const content = `${user.lastName}${totalSubjects > 1 ? ` và ${totalSubjects - 1} người khác` : ''} đã bình luận về bài viết của bạn`;
+        const content = `${user.lastName} đã bình luận về bài viết của bạn`;
     
         notification.content = content;
         notification.imageUrl = user.avatar;
