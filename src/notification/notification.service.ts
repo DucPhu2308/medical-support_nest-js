@@ -8,6 +8,7 @@ import { Comment } from 'src/schemas/comment.schema';
 import { Notification, NotificationType } from 'src/schemas/notification.schema';
 import { Post } from 'src/schemas/post.schema';
 import { User } from 'src/schemas/user.schema';
+import { GeneralNotificationDto } from './dtos/general-notification.dto';
 
 @Injectable()
 export class NotificationService {
@@ -29,6 +30,17 @@ export class NotificationService {
     async markAsRead(notificationId: string[], userId: string) {
         await this.notificationModel.updateMany({ _id: { $in: notificationId } }, { isRead: true });
         return this.getNotifications(userId);
+    }
+
+    async createGeneralNotification(generalNotication: GeneralNotificationDto) {
+        return this.notificationModel.create({
+            ...generalNotication,
+            type: NotificationType.GENERAL,
+        });
+    }
+
+    async pushGeneralNotificationToQueue(generalNotication: GeneralNotificationDto) {
+        await this.notificationQueue.add('general-notification', generalNotication);
     }
 
     async createOrUpdateReactPostNotification(userId: string, postId: string) {

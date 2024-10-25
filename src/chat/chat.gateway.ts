@@ -104,7 +104,7 @@ export class ChatGateway implements OnGatewayConnection {
         message: message._id
       });
     } else if (status === AppointmentStatus.CANCELLED) { // cancel the separate appointment too
-      await this.appointmentService.cancelAppointmentByMessageId(message._id);
+      await this.appointmentService.cancelAppointmentByMessageId(message._id, client.data.user.sub);
     }
 
     const chat = await this.chatService.getChat(message.chat);
