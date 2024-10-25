@@ -24,6 +24,13 @@ export class NotificationProcessor {
         this.notificationGateway.sendNotificationToUser(notification.recipient.toHexString(), notification);
     }
 
+    @Process('reply-comment-notification')
+    async replyCommentNotification(job: Job) {
+        const { parentComment, userId } = job.data;
+        const notification = await this.notificationService.createOrUpdateReplyCommentNotification(userId, parentComment);
+        this.notificationGateway.sendNotificationToUser(notification.recipient.toHexString(), notification);
+    }
+
     @Process('appointment-reminder')
     async appointmentReminder(job: Job) {
         const { appointmentId } = job.data;

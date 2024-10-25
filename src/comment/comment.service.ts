@@ -43,6 +43,9 @@ export class CommentService {
         // If this is a reply, add the new comment to the parent comment's replies array
         if (parentComment) {
             parentComment.replies.push(newComment._id);
+            if (parentComment.author.toHexString() !== currentUser._id.toHexString()) {
+                this.notificationService.pushReplyCommentNotificationToQueue(currentUser._id.toHexString(), parentComment);
+            }
             await parentComment.save();
         } else {
             // Otherwise, it's a top-level comment on a post

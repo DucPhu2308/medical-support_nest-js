@@ -7,6 +7,7 @@ export enum NotificationType {
     POST_COMMENT = 'post_comment',
     REPLY_COMMENT = 'reply_comment',
     APPOINTMENT_REMINDER = 'appointment_reminder',
+    GENERAL = 'general'
 }
 
 @Schema({ timestamps: true })
@@ -17,7 +18,7 @@ export class Notification extends BaseSchema {
     type: NotificationType;
     // @Prop({ required: true, type: [{ type: mongoose.Schema.Types.Mixed }] })
     // subjects: any[];
-    @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
+    @Prop({ type: mongoose.Schema.Types.Mixed })
     directObject: any;
     // @Prop({ type: mongoose.Schema.Types.Mixed})
     // indirectObject: any;
