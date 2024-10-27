@@ -17,6 +17,11 @@ export class UserController {
         return this.userService.findOneByEmailContains(email);
     }
 
+    @Get('/search')
+    async searchUsers(@Query('query') query: string, @Query('isDoctor') isDoctor: boolean) {
+        return this.userService.findOneByEmailOrUsernameContains(query, isDoctor);
+    }
+
     @Get('/all')
     async getAllUsers() {
         return this.userService.findAll();

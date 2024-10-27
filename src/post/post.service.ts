@@ -124,6 +124,10 @@ export class PostService {
             query.author = new Types.ObjectId(filterDto.userId);
         }
 
+        if (filterDto.tagId) {
+            query.tags = new Types.ObjectId(filterDto.tagId);
+        }
+
         if (filterDto.title || filterDto.content) {
             query.$or = [];
 
