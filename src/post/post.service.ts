@@ -32,8 +32,14 @@ export class PostService {
         // Initialize the tags array
         let tags: Types.ObjectId[] = [];
 
+
+
         // Ensure tags is always an array (even if a single tag is provided)
-        const tagInput = Array.isArray(createPostDto.tags) ? createPostDto.tags : [createPostDto.tags];
+        const tagInput = typeof createPostDto.tags === 'string'
+            ? createPostDto.tags.split(',')
+            : Array.isArray(createPostDto.tags)
+                ? createPostDto.tags
+                : [createPostDto.tags];
 
         // Process tags asynchronously
         if (tagInput && tagInput.length > 0) {

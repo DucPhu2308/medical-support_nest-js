@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty, IsOptional } from "class-validator";
 
 
 
@@ -18,4 +18,8 @@ export class CreateCommentPostDto {
     @ApiProperty()
     @IsNotEmpty()
     userId: string;
+
+    @ApiProperty()
+    @IsOptional()
+    imageContent: Express.Multer.File;
 }

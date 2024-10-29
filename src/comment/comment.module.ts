@@ -6,6 +6,7 @@ import { Comment, CommentSchema } from "src/schemas/comment.schema";
 import { Post, PostSchema } from "src/schemas/post.schema";
 import { User, UserSchema } from "src/schemas/user.schema";
 import { NotificationModule } from "src/notification/notification.module";
+import { FirebaseModule } from "src/firebase/firebase.module";
 
 
 @Module({
@@ -15,7 +16,8 @@ import { NotificationModule } from "src/notification/notification.module";
             { name: Post.name, schema:PostSchema },
             { name: User.name, schema:UserSchema }
         ]),
-        NotificationModule
+        NotificationModule,
+        FirebaseModule
     ],
     controllers: [CommentController],
     providers: [CommentService],
