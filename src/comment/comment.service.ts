@@ -49,6 +49,9 @@ export class CommentService {
     
         if (parentComment) {
             parentComment.replies.push(newComment._id);
+            if (parentComment.author.toHexString() !== currentUser._id.toHexString()) {
+                this.notificationService.pushReplyCommentNotificationToQueue(currentUser._id.toHexString(), parentComment);
+            }
             await parentComment.save();
         } else {
             const post = await this.postModel.findById(createCommentDto.postId);

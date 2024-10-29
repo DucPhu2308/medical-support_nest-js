@@ -2,6 +2,7 @@ import { Process, Processor } from "@nestjs/bull";
 import { NotificationService } from "./notification.service";
 import { NotificationGateway } from "./notification.gateway";
 import { Job } from "bull";
+import { GeneralNotificationDto } from "./dtos/general-notification.dto";
 
 @Processor('notification')
 export class NotificationProcessor {
@@ -9,6 +10,13 @@ export class NotificationProcessor {
         private readonly notificationService: NotificationService,
         private readonly notificationGateway: NotificationGateway,
     ) {}
+
+    @Process('general-notification')
+    async generalNotification(job: Job) {
+        const generalNotication: GeneralNotificationDto = job.data;
+        const notification = await this.notificationService.createGeneralNotification(generalNotication);
+        this.notificationGateway.sendNotificationToUser(notification.recipient.toHexString(), notification);
+    }
 
     @Process('react-post-notification')
     async reactPostNotification(job: Job) {
@@ -21,6 +29,13 @@ export class NotificationProcessor {
     async commentPostNotification(job: Job) {
         const { postId, userId } = job.data;
         const notification = await this.notificationService.createOrUpdateCommentPostNotification(userId, postId);
+        this.notificationGateway.sendNotificationToUser(notification.recipient.toHexString(), notification);
+    }
+
+    @Process('reply-comment-notification')
+    async replyCommentNotification(job: Job) {
+        const { parentComment, userId } = job.data;
+        const notification = await this.notificationService.createOrUpdateReplyCommentNotification(userId, parentComment);
         this.notificationGateway.sendNotificationToUser(notification.recipient.toHexString(), notification);
     }
 

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MONGO_SELECT } from 'src/common/constances';
-import { User } from 'src/schemas/user.schema';
+import { User, UserRole } from 'src/schemas/user.schema';
 import { UpdateProfileDto } from './dtos/update-profile.dto';
 import { FollowUserDto } from './dtos/follow-user.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -23,6 +23,24 @@ export class UserService {
         return this.userModel
             .find({ email: { $regex: email, $options: 'i' } })
             .select(MONGO_SELECT.USER.DEFAULT);
+    }
+
+    async findOneByEmailOrUsernameContains(query: string, isDoctor: boolean) {
+        const mongoQuery = this.userModel
+            .find({
+                $or: [
+                    { email: { $regex: query, $options: 'i' } },
+                    { username: { $regex: query, $options: 'i' } },
+                ],
+            })
+            .select(MONGO_SELECT.USER.DEFAULT);
+
+        if (isDoctor) {
+            // user.roles contains 'doctor'
+            mongoQuery.where('roles').in([UserRole.DOCTOR]);
+        }
+
+        return mongoQuery;
     }
 
     async findOneById(userId: string) {

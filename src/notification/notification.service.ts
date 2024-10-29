@@ -8,6 +8,7 @@ import { Comment } from 'src/schemas/comment.schema';
 import { Notification, NotificationType } from 'src/schemas/notification.schema';
 import { Post } from 'src/schemas/post.schema';
 import { User } from 'src/schemas/user.schema';
+import { GeneralNotificationDto } from './dtos/general-notification.dto';
 
 @Injectable()
 export class NotificationService {
@@ -29,6 +30,17 @@ export class NotificationService {
     async markAsRead(notificationId: string[], userId: string) {
         await this.notificationModel.updateMany({ _id: { $in: notificationId } }, { isRead: true });
         return this.getNotifications(userId);
+    }
+
+    async createGeneralNotification(generalNotication: GeneralNotificationDto) {
+        return this.notificationModel.create({
+            ...generalNotication,
+            type: NotificationType.GENERAL,
+        });
+    }
+
+    async pushGeneralNotificationToQueue(generalNotication: GeneralNotificationDto) {
+        await this.notificationQueue.add('general-notification', generalNotication);
     }
 
     async createOrUpdateReactPostNotification(userId: string, postId: string) {
@@ -67,8 +79,7 @@ export class NotificationService {
             type: NotificationType.POST_COMMENT,
         }) || new this.notificationModel();
     
-        const totalSubjects = post.comments.length;
-        const content = `${user.lastName}${totalSubjects > 1 ? ` và ${totalSubjects - 1} người khác` : ''} đã bình luận về bài viết của bạn`;
+        const content = `${user.lastName} đã bình luận về bài viết của bạn`;
     
         notification.content = content;
         notification.imageUrl = user.avatar;
@@ -82,40 +93,25 @@ export class NotificationService {
 
     }
 
-    async createOrUpdateReplyCommentNotification(userId: string, comment: Comment) {
-        const [post, user] = await Promise.all([
-            this.postModel.findById(comment.postId),
-            this.userModel.findById(userId),
-        ]);
+    async createOrUpdateReplyCommentNotification(userId: string, parentComment: Comment) {
+        const user = await this.userModel.findById(userId);
 
         const notification = await this.notificationModel.findOne({
-            directObject: comment._id,
+            directObject: parentComment._id,
             type: NotificationType.REPLY_COMMENT,
-        });
-
-        if (notification) {
-            // notification.subjects.push(userId);
-            const totalSubjects = post.comments.length;
-            // notification.content = `${user.lastName} ${totalSubjects > 1 ? `và ${totalSubject}` : ''} đã bày tỏ cảm xúc với bài viết của bạn`;
-            let content = user.lastName;
-            if (totalSubjects > 1) {
-                content += ` và ${totalSubjects - 1} người khác`;
-            }
-            content += ' đã trả lời bình luận của bạn';
-            notification.content = content;
-            notification.imageUrl = user.avatar;
-            notification.isRead = false;
-            return notification.save();
-        } else {
-            const newNoti = await this.notificationModel.create({
-                content: `${user.lastName} đã trả lời bình luận của bạn`,
-                type: NotificationType.REPLY_COMMENT,
-                recipient: post.author,
-                actionUrl: `/post/${post._id}`,
-                imageUrl: user.avatar,
-            });
-            return newNoti;
-        }
+        }) || new this.notificationModel();
+    
+        const content = `${user.lastName} đã trả lời bình luận của bạn`;
+    
+        notification.content = content;
+        notification.imageUrl = user.avatar;
+        notification.isRead = false;
+        notification.directObject = parentComment._id;
+        notification.type = NotificationType.REPLY_COMMENT;
+        notification.recipient = parentComment.author;
+        notification.actionUrl = `/post/${parentComment.postId}`;
+    
+        return notification.save();
     }
 
     async pushReactPostNotificationToQueue(userId: string, postId: string) {
@@ -124,6 +120,10 @@ export class NotificationService {
 
     async pushCommentPostNotificationToQueue(userId: string, postId: string) {
         await this.notificationQueue.add('comment-post-notification', { userId, postId });
+    }
+
+    async pushReplyCommentNotificationToQueue(userId: string, parentComment: Comment) {
+        await this.notificationQueue.add('reply-comment-notification', { userId, parentComment });
     }
 
     async scheduleAppointmentReminder(appointmentId: string) {

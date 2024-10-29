@@ -23,4 +23,8 @@ export class GetPostFillterDto {
     @ApiPropertyOptional()
     content?: string;
 
+    @IsOptional()
+    @IsString()
+    @ApiPropertyOptional()
+    tagId?: string;
 }
