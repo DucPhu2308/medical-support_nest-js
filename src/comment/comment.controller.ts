@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post, Put, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put, Request, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CommentService } from "./comment.service";
 import { AuthGuard } from "src/auth/auth.guard";
 import { CreateCommentPostDto } from "./dtos/create-comment-post.dto";
 import { Types } from "mongoose";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 
 
@@ -16,7 +17,12 @@ export class CommentController {
 
     @Post()
     @UseGuards(AuthGuard)
-    async createComment(@Request() req, @Body() createCommentDto: CreateCommentPostDto) {
+    @UseInterceptors(FileInterceptor('imageContent'))
+    async createComment(@Request() req, @Body() createCommentDto: CreateCommentPostDto,
+            @UploadedFile() file: Express.Multer.File) {
+        if (file) {
+            createCommentDto.imageContent = file;
+        }
         return this.commentService.createComment(createCommentDto);
     }
 

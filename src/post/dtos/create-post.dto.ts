@@ -26,5 +26,5 @@ export class CreatePostDto {
 
     @ApiPropertyOptional()
     @IsOptional()
-    tags: string[];
+    tags: string|string[];
 }

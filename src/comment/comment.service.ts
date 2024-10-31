@@ -6,6 +6,7 @@ import { User } from "src/schemas/user.schema";
 import { Comment } from "src/schemas/comment.schema";
 import { Post } from "src/schemas/post.schema";
 import { NotificationService } from "src/notification/notification.service";
+import { FirebaseService, UploadFolder } from "src/firebase/firebase.service";
 
 
 
@@ -15,7 +16,8 @@ export class CommentService {
         @InjectModel(Comment.name) private commentModel: Model<Comment>,
         @InjectModel(User.name) private userModel: Model<User>,
         @InjectModel(Post.name) private postModel: Model<Post>,
-        private readonly notificationService: NotificationService
+        private readonly notificationService: NotificationService,
+        private readonly firebaseService: FirebaseService
     ) { }
 
     async createComment(createCommentDto: CreateCommentPostDto) {
@@ -23,7 +25,7 @@ export class CommentService {
         if (!currentUser) {
             throw new Error('User not found');
         }
-
+    
         let parentComment = null;
         if (createCommentDto.parentCommentId) {
             parentComment = await this.commentModel.findById(createCommentDto.parentCommentId);
@@ -31,16 +33,20 @@ export class CommentService {
                 throw new Error('Parent comment not found');
             }
         }
-
+    
+        const image = createCommentDto.imageContent 
+            ? await this.firebaseService.uploadFile(createCommentDto.imageContent, UploadFolder.POST) 
+            : null;
+    
         const newComment = await this.commentModel.create({
             author: currentUser._id,
             content: createCommentDto.content,
             postId: new Types.ObjectId(createCommentDto.postId),
             replies: [],
-            parentId: parentComment ? parentComment._id : null, // Set parentId if this is a reply
+            parentId: parentComment ? parentComment._id : null,
+            image: image
         });
-
-        // If this is a reply, add the new comment to the parent comment's replies array
+    
         if (parentComment) {
             parentComment.replies.push(newComment._id);
             if (parentComment.author.toHexString() !== currentUser._id.toHexString()) {
@@ -48,24 +54,23 @@ export class CommentService {
             }
             await parentComment.save();
         } else {
-            // Otherwise, it's a top-level comment on a post
             const post = await this.postModel.findById(createCommentDto.postId);
             if (!post) {
                 throw new Error('Post not found');
             }
             post.comments.push(newComment._id);
-
+    
             if (post.author.toHexString() !== currentUser._id.toHexString()) {
                 this.notificationService.pushCommentPostNotificationToQueue(currentUser._id.toHexString(), post._id.toHexString());
             }
-
+    
             await post.save();
         }
-
+    
         await newComment.populate('author');
-
         return newComment;
     }
+    
 
 
     async findCommentsByPostId(postId: Types.ObjectId): Promise<any[]> {

@@ -21,6 +21,9 @@ export class Comment extends BaseSchema {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Comment', default: null })
     parentId?: Types.ObjectId;
 
+    @Prop({ default: null })
+    image?: string;
+
 }
 
 export type CommentDocument = HydratedDocument<Comment>;
