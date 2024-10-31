@@ -125,7 +125,7 @@ export class PostService {
         }
 
         if (filterDto.tagId) {
-            query.tags = new Types.ObjectId(filterDto.tagId);
+            query.tags = { $in: [new Types.ObjectId(filterDto.tagId)] };
         }
 
         if (filterDto.title || filterDto.content) {
