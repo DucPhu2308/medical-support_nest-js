@@ -9,7 +9,7 @@ export class CreateCommentPostDto {
     postId: string;
 
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     content: string;
 
     @ApiProperty()
