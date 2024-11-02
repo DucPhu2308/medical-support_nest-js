@@ -16,6 +16,12 @@ export class AppointmentService {
         private readonly notificationService: NotificationService,
     ) { }
 
+    async getAppointmentById(id: string) {
+        return await this.appointmentModel.findById(id)
+            .populate('sender', MONGO_SELECT.USER.DEFAULT)
+            .populate('recipient', MONGO_SELECT.USER.DEFAULT);
+    }
+
     async createAppointment(appointment: CreateAppointmentDto) {
         const appt = await this.appointmentModel.create(appointment);
         this.notificationService.scheduleAppointmentReminder(appt._id.toHexString());

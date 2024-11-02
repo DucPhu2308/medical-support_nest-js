@@ -64,6 +64,7 @@ export class NotificationService {
         notification.type = NotificationType.POST_REACT;
         notification.recipient = post.author;
         notification.actionUrl = `/post/${postId}`;
+        notification.updatedAt = new Date();
     
         return notification.save();
     }
@@ -88,6 +89,7 @@ export class NotificationService {
         notification.type = NotificationType.POST_COMMENT;
         notification.recipient = post.author;
         notification.actionUrl = `/post/${postId}`;
+        notification.updatedAt = new Date();
     
         return notification.save();
 
@@ -110,6 +112,7 @@ export class NotificationService {
         notification.type = NotificationType.REPLY_COMMENT;
         notification.recipient = parentComment.author;
         notification.actionUrl = `/post/${parentComment.postId}`;
+        notification.updatedAt = new Date();
     
         return notification.save();
     }
