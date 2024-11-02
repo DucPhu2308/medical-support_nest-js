@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 
@@ -23,13 +23,26 @@ export class ChatController {
     }
 
     @Get('/:chatId')
-    getChat(@Param('chatId') chatId: string) {
-        return this.chatService.getChatById(chatId);
+    @UseGuards(AuthGuard)
+    getChat(@Param('chatId') chatId: string, @Req() req) {
+        return this.chatService.getChatById(chatId, req.user.sub);
     }
 
     @Get()
     @UseGuards(AuthGuard)
     getChats(@Req() req) {
         return this.chatService.getChats(req.user.sub);
+    }
+
+    @Get('/count-unread')
+    @UseGuards(AuthGuard)
+    countUnread(@Req() req) {
+        return this.chatService.getUnreadChatsCount(req.user.sub);
+    }
+
+    @Put('/:chatId/mark-as-read')
+    @UseGuards(AuthGuard)
+    readChat(@Param('chatId') chatId: string, @Req() req) {
+        return this.chatService.markChatAsRead(chatId, req.user.sub);
     }
 }
