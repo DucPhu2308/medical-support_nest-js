@@ -102,4 +102,12 @@ export class UserService {
             );
         }
     }
+
+
+    async findFollowedByUser(userId: string) {
+        return this.userModel
+            .findById(userId)
+            .select('following')
+            .populate('following', MONGO_SELECT.USER.DEFAULT);
+    }
 }
