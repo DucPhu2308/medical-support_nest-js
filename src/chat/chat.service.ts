@@ -48,7 +48,11 @@ export class ChatService {
     }
 
     async getUnreadChatsCount(userId: string) {
-        return await this.chatModel.countDocuments({ participants: userId, readBy: { $ne: userId } });
+        return await this.chatModel.countDocuments({ 
+            participants: userId, 
+            readBy: { $ne: userId },
+            lastMessage: { $ne: null }
+        });
     }
 
     async getChatById(chatId: string, userId: string) {

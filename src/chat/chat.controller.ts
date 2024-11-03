@@ -34,7 +34,8 @@ export class ChatController {
         return this.chatService.getChats(req.user.sub);
     }
 
-    @Get('/count-unread')
+    // /count-unread is conflict with the above /:chatId, so count-unread unuseable
+    @Get('/count/unread')
     @UseGuards(AuthGuard)
     countUnread(@Req() req) {
         return this.chatService.getUnreadChatsCount(req.user.sub);
