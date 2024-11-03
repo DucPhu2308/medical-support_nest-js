@@ -15,6 +15,8 @@ export class Chat extends BaseSchema {
     isGroup: boolean;
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Message' })
     lastMessage: Types.ObjectId;
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
+    readBy: Types.ObjectId[];
 }
 
 export const ChatSchema = SchemaFactory.createForClass(Chat);

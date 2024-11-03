@@ -12,4 +12,10 @@ export class AppointmentController {
     async getAppointmentByUserId(@Req() req, @Query() filter: GetApptFilterDto) {
         return await this.appointmentService.getAppointmentByUserId(req.user.sub, filter);
     }
+
+    @Get(':id')
+    @UseGuards(AuthGuard)
+    async getAppointmentById(@Param('id') id: string) {
+        return await this.appointmentService.getAppointmentById(id);
+    }
 }

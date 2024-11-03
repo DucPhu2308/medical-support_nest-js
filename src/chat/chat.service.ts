@@ -6,6 +6,8 @@ import { AppointmentMessage, AppointmentStatus, Message } from 'src/schemas/mess
 import { MessageDto } from './dtos/message.dto';
 import { MONGO_SELECT } from 'src/common/constances';
 
+type ChatWithRead = Chat & { isRead: boolean };
+
 @Injectable()
 export class ChatService {
     constructor(
@@ -30,16 +32,35 @@ export class ChatService {
 
         await newMessage.save();
         chat.lastMessage = newMessage._id;
+        chat.readBy = [message.sender];
         await chat.save();
 
         return newMessage.populate('sender', MONGO_SELECT.USER.DEFAULT);
     }
 
-    async getChatById(chatId: string) {
+    async markChatAsRead(chatId: string, userId: string) {
+        const chat = await this.chatModel.findById(chatId);
+        if (!chat) {
+            throw new HttpException('Chat not found', 404);
+        }
+        chat.readBy.push(new Types.ObjectId(userId));
+        return await chat.save();
+    }
+
+    async getUnreadChatsCount(userId: string) {
+        return await this.chatModel.countDocuments({ participants: userId, readBy: { $ne: userId } });
+    }
+
+    async getChatById(chatId: string, userId: string) {
         return await this.chatModel
             .findById(chatId)
             .populate('participants', MONGO_SELECT.USER.DEFAULT)
-            .populate('lastMessage');
+            .populate('lastMessage')
+            .lean<ChatWithRead>()
+            .then(chat => {
+                chat.isRead = chat.readBy.some(id => id.toHexString() === userId);
+                return chat;
+            });
     }
 
     async newChat(participants: string[]) {
@@ -60,7 +81,14 @@ export class ChatService {
             .find({ participants: userId, lastMessage: { $ne: null } })
             .sort({ updatedAt: -1 })
             .populate('participants', MONGO_SELECT.USER.DEFAULT)
-            .populate('lastMessage');
+            .populate('lastMessage')
+            .lean<ChatWithRead[]>()
+            .then(chats => {
+                return chats.map(chat => {
+                    chat.isRead = chat.readBy.some(id => id.toHexString() === userId);
+                    return chat;
+                });
+            });
     }
 
     async getMessagesPage(chatId: string, page: number, pageSize: number) {
