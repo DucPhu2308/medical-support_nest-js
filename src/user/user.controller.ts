@@ -32,11 +32,19 @@ export class UserController {
         return this.userService.findOneById(userId);
     }
 
+    @Get('/followedByUser/')
+    async getFollowedByUser(@Query('userId') userId: string) {
+        return this.userService.findFollowedByUser(userId);
+    }
+
+
     @Put('/follow/')
     @UseGuards(AuthGuard)
     async followUser(@Request() req, @Query('userId') userId: string) {
         return this.userService.followUser({userId: userId, followId: req.user.sub});
     }
+
+
 
     @Put('/update-profile')
     @UseGuards(AuthGuard)

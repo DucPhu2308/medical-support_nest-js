@@ -15,6 +15,7 @@ export class FirebaseService {
 
     async uploadFile(file: Express.Multer.File, folder: UploadFolder) {
         // get file extension
+        console.log(file.originalname);
         const fileExtension = file.originalname.split('.').pop();
         if (!fileExtension) {
             throw new Error('Invalid file extension');
