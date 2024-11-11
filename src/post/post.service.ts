@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
-import { Post } from 'src/schemas/post.schema';
+import { Post, PostStatus } from 'src/schemas/post.schema';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { MONGO_SELECT } from 'src/common/constances';
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
@@ -246,6 +246,20 @@ export class PostService {
         else {
             if (updatePostDto.status) {
                 post.status = updatePostDto.status;
+
+                if (updatePostDto.status === PostStatus.PUBLISHED) {
+                    console.log('published');
+                    this.notificationService.pushGeneralNotificationToQueue({
+                        recipient: post.author,
+                        content: 'Bài viết của bạn đã được duyệt.',
+                        actionUrl: `/post/${postId}`,
+                    });
+                } else if (updatePostDto.status === PostStatus.REJECTED) {
+                    this.notificationService.pushGeneralNotificationToQueue({
+                        recipient: post.author,
+                        content: `Bài viết "${post.title}" của bạn đã bị từ chối với lí do: .`,
+                    });
+                }
             }
             await post.save();
 
