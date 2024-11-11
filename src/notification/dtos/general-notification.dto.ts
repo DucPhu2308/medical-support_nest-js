@@ -4,6 +4,6 @@ import { Types } from "mongoose";
 export class GeneralNotificationDto {
     recipient: string | Types.ObjectId;
     content: string;
-    actionUrl: string = '';
+    actionUrl?: string = '';
     imageUrl?: string = '';
 }
