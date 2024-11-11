@@ -38,6 +38,8 @@ export class Post extends BaseSchema {
     lovedBy: Types.ObjectId[];
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
     surprisedBy: Types.ObjectId[];
+    @Prop()
+    reasonRejected: string;
 }
 
 export type PostDocument = HydratedDocument<Post>;
