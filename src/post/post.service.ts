@@ -228,7 +228,6 @@ export class PostService {
             throw new Error('Post not found');
         }
         let check = false;
-        console.log(userId);
         const authorPublished = await this.userModel.findById(userId);
         if (authorPublished.roles.includes('DOCTOR')) {
             for (let i = 0; i < post.tags.length; i++) {
@@ -244,7 +243,11 @@ export class PostService {
             throw new Error('Unauthorized');
         }
         else {
-            if (updatePostDto.status) {
+            if (updatePostDto.status && updatePostDto.reasonRejected !== null) {
+                post.status = updatePostDto.status;
+                post.reasonRejected = updatePostDto.reasonRejected;
+            }
+            else {
                 post.status = updatePostDto.status;
 
                 if (updatePostDto.status === PostStatus.PUBLISHED) {

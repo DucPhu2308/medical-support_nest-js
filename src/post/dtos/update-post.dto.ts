@@ -27,6 +27,10 @@ export class UpdatePostDto {
     @IsOptional()
     status: string;
 
+    @ApiPropertyOptional()
+    @IsOptional()
+    reasonRejected: string;
+
     // @ApiPropertyOptional()
     // @IsOptional()
     // publishedBy: string;
