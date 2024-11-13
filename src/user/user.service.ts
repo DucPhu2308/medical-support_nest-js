@@ -8,6 +8,8 @@ import { FollowUserDto } from './dtos/follow-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
 
+type UserWithFollowing = User & { isFollowing: boolean };
+
 @Injectable()
 export class UserService {
     constructor(
@@ -25,13 +27,15 @@ export class UserService {
             .select(MONGO_SELECT.USER.DEFAULT);
     }
 
-    async findOneByEmailOrUsernameContains(query: string, isDoctor: boolean) {
+    async findOneByEmailOrUsernameContains(query: string, isDoctor: boolean, userId: string) {
+        const user = await this.userModel.findById(userId);
         const mongoQuery = this.userModel
             .find({
                 $or: [
-                    { email: { $regex: query, $options: 'i' } },
-                    { username: { $regex: query, $options: 'i' } },
+                    { email: { $regex: query || "", $options: 'i' } },
+                    { username: { $regex: query || "", $options: 'i' } },
                 ],
+                _id: { $ne: userId },
             })
             .select(MONGO_SELECT.USER.DEFAULT);
 
@@ -40,7 +44,15 @@ export class UserService {
             mongoQuery.where('roles').in([UserRole.DOCTOR]);
         }
 
-        return mongoQuery;
+        // add isFollowing field to each user
+        return await mongoQuery
+            .lean<UserWithFollowing[]>()
+            .then((users) => {
+                return users.map((u) => {
+                    u.isFollowing = u.following && u.following.some((f) => f._id.toString() === userId);
+                    return u;
+                });
+            });
     }
 
     async findOneById(userId: string) {

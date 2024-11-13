@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Query, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, Req, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/schemas/user.schema';
@@ -18,8 +18,9 @@ export class UserController {
     }
 
     @Get('/search')
-    async searchUsers(@Query('query') query: string, @Query('isDoctor') isDoctor: boolean) {
-        return this.userService.findOneByEmailOrUsernameContains(query, isDoctor);
+    @UseGuards(AuthGuard)
+    async searchUsers(@Query('query') query: string, @Query('isDoctor') isDoctor: boolean, @Req() req) {
+        return this.userService.findOneByEmailOrUsernameContains(query, isDoctor, req.user.sub);
     }
 
     @Get('/all')
