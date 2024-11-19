@@ -89,7 +89,7 @@ export class ChatService {
             .lean<ChatWithRead[]>()
             .then(chats => {
                 return chats.map(chat => {
-                    chat.isRead = chat.readBy.some(id => id.toHexString() === userId);
+                    chat.isRead = chat.readBy && chat.readBy.some(id => id.toHexString() === userId);
                     return chat;
                 });
             });
