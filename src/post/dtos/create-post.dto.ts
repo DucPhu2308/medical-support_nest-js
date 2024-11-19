@@ -2,6 +2,7 @@ import { Type } from "@nestjs/common";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsNotEmpty, IsOptional } from "class-validator";
 import { Types } from "mongoose";
+import { User } from "src/schemas/user.schema";
 
 export class CreatePostDto {
     @ApiProperty()
@@ -22,9 +23,12 @@ export class CreatePostDto {
     @IsOptional()
     images: Array<Express.Multer.File>;
 
-    author: string;
+    author : string ;
+
 
     @ApiPropertyOptional()
     @IsOptional()
     tags: string|string[];
+
+    
 }
