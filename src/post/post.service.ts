@@ -31,8 +31,7 @@ export class PostService {
 
         // Initialize the tags array
         let tags: Types.ObjectId[] = [];
-
-
+        let status = PostStatus.PENDING;
 
         // Ensure tags is always an array (even if a single tag is provided)
         const tagInput = typeof createPostDto.tags === 'string'
@@ -55,6 +54,12 @@ export class PostService {
             tags = tags.filter(tag => tag !== undefined);
         }
 
+        const author = await this.userModel.findById(createPostDto.author);
+
+        if(author.roles.includes('DOCTOR')) {
+            status = PostStatus.PUBLISHED;
+        }
+
         // If there are images, upload them
         if (files) {
             const images = await Promise.all(
@@ -68,12 +73,14 @@ export class PostService {
                 ...createPostDto,
                 tags,  // Save tags (if any)
                 images,  // Save images
+                status,
             });
         } else {
             // Save the post without images but with tags (if any)
             return await this.postModel.create({
                 ...createPostDto,
                 tags,  // Save tags (if any)
+                status,
             });
         }
     }
