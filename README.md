@@ -9,6 +9,7 @@ The main purpose of building a website to support patients and doctors is to cre
 ### Built With
 - NestJS
 - ReactJS
+- React Native
 - MongoDB
 - Socket.io
 - WebRTC
@@ -80,7 +81,7 @@ PROJECT_ID=medical-support
 ```
 
 ### Executing
-Excute this:
+Execute this:
 ```bash
 npm run start
 ```
@@ -88,7 +89,7 @@ then the back-end server should be running.
 
 ## Related
 - [Front-end ReactJS Repo](https://github.com/galaticwarrior123/SupportMedical_ReactJS)
-- [Front-end ReactNative Repo](https://github.com/DucPhu2308/MedicalSupport_ReactNative)
+- [Front-end React Native Repo](https://github.com/DucPhu2308/MedicalSupport_ReactNative)
 - [Full academic report] - to be filled later
 
 ## Authors
