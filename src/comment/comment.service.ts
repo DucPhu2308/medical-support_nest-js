@@ -73,7 +73,7 @@ export class CommentService {
     
 
 
-    async findCommentsByPostId(postId: Types.ObjectId): Promise<any[]> {
+    async findCommentsByPostId(postId: Types.ObjectId): Promise<{ comments: any[], totalComments: number }> {
         // Retrieve the post and its comments
         const post = await this.postModel.findById(postId).populate({
             path: 'comments',
@@ -94,6 +94,8 @@ export class CommentService {
                 model: 'User'   // Specify the model name for the user
             })
             .exec();
+        
+        let totalComments = comments.length;
 
         // Function to populate replies recursively
         const populateReplies = async (comment: any) => {
@@ -103,6 +105,8 @@ export class CommentService {
                     model: 'User'   // Specify the model name for the user
                 })
                 .exec();
+            
+            totalComments += comment.replies.length;
 
             // Recursively populate replies for each reply
             for (const reply of comment.replies) {
@@ -115,7 +119,10 @@ export class CommentService {
             await populateReplies(comment);
         }
 
-        return comments;
+        return {
+            comments,
+            totalComments
+        };
     }
 
     async likeComment(commentId: string, userId: string) {
