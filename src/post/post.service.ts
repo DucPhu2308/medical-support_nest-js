@@ -230,6 +230,7 @@ export class PostService {
     }
 
     async updatePost(postId: string, userId: string, updatePostDto: UpdatePostDto) {
+        console.log(updatePostDto);
         const post = await this.postModel.findById(postId);
         if (!post) {
             throw new Error('Post not found');
@@ -250,26 +251,24 @@ export class PostService {
             throw new Error('Unauthorized');
         }
         else {
-            if (updatePostDto.status && updatePostDto.reasonRejected !== null) {
-                post.status = updatePostDto.status;
-                post.reasonRejected = updatePostDto.reasonRejected;
-            }
-            else {
-                post.status = updatePostDto.status;
+            post.status = updatePostDto.status;
+            console.log(updatePostDto);
 
-                if (updatePostDto.status === PostStatus.PUBLISHED) {
-                    console.log('published');
-                    this.notificationService.pushGeneralNotificationToQueue({
-                        recipient: post.author,
-                        content: 'Bài viết của bạn đã được duyệt.',
-                        actionUrl: `/post/${postId}`,
-                    });
-                } else if (updatePostDto.status === PostStatus.REJECTED) {
-                    this.notificationService.pushGeneralNotificationToQueue({
-                        recipient: post.author,
-                        content: `Bài viết "${post.title}" của bạn đã bị từ chối với lí do: .`,
-                    });
-                }
+            if (updatePostDto.status === PostStatus.PUBLISHED) {
+                console.log('published');
+                this.notificationService.pushGeneralNotificationToQueue({
+                    recipient: post.author,
+                    content: 'Bài viết của bạn đã được duyệt.',
+                    actionUrl: `/post/${postId}`,
+                });
+            } else if (updatePostDto.status === PostStatus.REJECTED) {
+                console.log('rejected');
+                post.reasonRejected = updatePostDto.reasonRejected;
+
+                this.notificationService.pushGeneralNotificationToQueue({
+                    recipient: post.author,
+                    content: `Bài viết "${post.title}" của bạn đã bị từ chối với lí do: ${updatePostDto.reasonRejected}.`,
+                });
             }
             await post.save();
 
