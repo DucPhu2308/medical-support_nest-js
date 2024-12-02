@@ -89,16 +89,15 @@ export class PostService {
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT);
     }
 
-    async getPostByPostId(postId: string) {
-        return await this.postModel.findById(postId)
-            .populate('author', MONGO_SELECT.USER.DEFAULT)
-            .populate('likedBy', MONGO_SELECT.USER.DEFAULT);
-    }
+    // async getPostByPostId(postId: string) {
+    //     return await this.postModel.findById(postId)
+    //         .populate('author', MONGO_SELECT.USER.DEFAULT)
+    //         .populate('likedBy', MONGO_SELECT.USER.DEFAULT);
+    // }
 
     async getPostBySearch(filterDto: GetPostFillterDto) {
         const query: any = {};
 
-        console.log(filterDto.postId);
 
         if (filterDto.postId) {
             query._id = new Types.ObjectId(filterDto.postId);
@@ -116,7 +115,7 @@ export class PostService {
             query.content = { $regex: filterDto.content, $options: 'i' };
         }
 
-        return this.postModel.find(query)
+        return await this.postModel.find(query)
             .populate('author', MONGO_SELECT.USER.DEFAULT)
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
@@ -127,8 +126,6 @@ export class PostService {
     async getPostBySearchPagination(filterDto: GetPostFillterDto, page: number, limit: number) {
         const query: any = {};
  
-        
-        
         if (filterDto.postId) {
             query._id = new Types.ObjectId(filterDto.postId);
             
@@ -154,10 +151,8 @@ export class PostService {
             }
         }
 
-        
 
-
-        const mongoQuery = this.postModel.find(query)
+        let mongoQuery = this.postModel.find(query)
             .populate('author', MONGO_SELECT.USER.DEFAULT)
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
@@ -165,13 +160,21 @@ export class PostService {
             .populate('tags', MONGO_SELECT.SPECIALITY.DEFAULT);
 
         if (page && limit) {
-            mongoQuery.skip((page - 1) * limit).limit(limit);
+            mongoQuery = mongoQuery.skip((page - 1) * limit).limit(limit);
         }
 
-        return mongoQuery;
+        // Execute the query and return the result
+        return await mongoQuery.exec();
     }
 
-
+    async getPostByPostId(postId: string) {
+        return await this.postModel.findById(postId)
+            .populate('author', MONGO_SELECT.USER.DEFAULT)
+            .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
+            .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
+            .populate('surprisedBy', MONGO_SELECT.USER.DEFAULT)
+            .populate('tags', MONGO_SELECT.SPECIALITY.DEFAULT);
+    }
 
     async likePost(postId: string, userId: string) {
         const post = await this.postModel.findById(postId);
