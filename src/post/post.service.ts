@@ -56,7 +56,7 @@ export class PostService {
 
         const author = await this.userModel.findById(createPostDto.author);
 
-        if(author.roles.includes('DOCTOR')) {
+        if (author.roles.includes('DOCTOR')) {
             status = PostStatus.PUBLISHED;
         }
 
@@ -102,6 +102,8 @@ export class PostService {
     async getPostBySearch(filterDto: GetPostFillterDto) {
         const query: any = {};
 
+        console.log(filterDto.postId);
+
         if (filterDto.postId) {
             query._id = new Types.ObjectId(filterDto.postId);
         }
@@ -123,14 +125,17 @@ export class PostService {
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('surprisedBy', MONGO_SELECT.USER.DEFAULT)
-            .populate('tags', MONGO_SELECT.SPECIALITY.DEFAULT);
+            .populate('tags', MONGO_SELECT.SPECIALITY.DEFAULT)
     }
 
     async getPostBySearchPagination(filterDto: GetPostFillterDto, page: number, limit: number) {
         const query: any = {};
-
+ 
+        
+        
         if (filterDto.postId) {
             query._id = new Types.ObjectId(filterDto.postId);
+            
         }
 
         if (filterDto.userId) {
@@ -153,6 +158,7 @@ export class PostService {
             }
         }
 
+        
 
 
         const mongoQuery = this.postModel.find(query)

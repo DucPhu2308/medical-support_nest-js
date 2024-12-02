@@ -5,7 +5,7 @@ import { Speciality } from "./speciality.schema";
 @Schema()
 export class DoctorInfo {
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Speciality' }] })
-    specialities: mongoose.Types.ObjectId;
+    specialities: Types.ObjectId[];
     @Prop()
     phone: string;
     @Prop({ default: false })

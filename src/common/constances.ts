@@ -8,6 +8,8 @@ export const MONGO_SELECT = {
     SPECIALITY: {
         DEFAULT: '-__v',
     },
+
+
 }
 
 export const FIREBASE_IMAGE_URL = 'https://firebasestorage.googleapis.com/v0/b/medical-support-652f1.appspot.com/o'
