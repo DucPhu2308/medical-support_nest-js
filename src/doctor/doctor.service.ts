@@ -23,7 +23,10 @@ export class DoctorService {
     ) { }
 
     async findAllDoctors() {
-        return this.userModel.find({ roles: UserRole.DOCTOR }).select('firstName lastName email gender dob avatar doctorInfo').populate('doctorInfo', 'specialities phone isPermission').populate('doctorInfo.specialities', 'name');
+        return this.userModel.find({ roles: UserRole.DOCTOR })
+            .select('firstName lastName email gender dob avatar doctorInfo')
+            .populate('doctorInfo', 'specialities phone isPermission')
+            .populate('doctorInfo.specialities', 'name');
     }
 
     async createDoctor(createDoctorDto: CreateDoctorDto) {

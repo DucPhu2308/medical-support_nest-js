@@ -1,19 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Post, PostStatus } from 'src/schemas/post.schema';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { MONGO_SELECT } from 'src/common/constances';
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
 import { GetPostFillterDto } from './dtos/get-post-fillter.dto';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
 import { NotificationService } from 'src/notification/notification.service';
-import { types } from 'util';
 import { Speciality } from 'src/schemas/speciality.schema';
 import { UpdatePostDto } from './dtos/update-post.dto';
 import { User } from 'src/schemas/user.schema';
-import { Console } from 'console';
 
 @Injectable()
 export class PostService {

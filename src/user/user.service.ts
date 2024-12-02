@@ -59,7 +59,9 @@ export class UserService {
         return this.userModel
             .findById(userId)
             .select(MONGO_SELECT.USER.DEFAULT)
-            .populate('following', MONGO_SELECT.USER.DEFAULT);
+            .populate('following', MONGO_SELECT.USER.DEFAULT)
+            .populate('doctorInfo', 'specialities phone isPermission')
+            .populate('doctorInfo.specialities', 'name');
     }
 
     async updateProfile(userId: string, data: UpdateProfileDto) {
