@@ -5,6 +5,7 @@ import { User } from 'src/schemas/user.schema';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UpdateProfileDto } from './dtos/update-profile.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 
 @Controller('/api/user')
 @ApiTags('user')
@@ -60,6 +61,12 @@ export class UserController {
         }
         
         return this.userService.updateProfile(req.user.sub, updateProfileDto);
+    }
+
+    @Put('/change-password')
+    @UseGuards(AuthGuard)
+    async changePassword(@Request() req, @Body() changePasswordDto: ChangePasswordDto) {
+        return this.userService.changePassword(changePasswordDto.newPassword, req.user.sub);
     }
 
 }

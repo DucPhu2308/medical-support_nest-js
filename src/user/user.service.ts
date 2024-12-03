@@ -7,7 +7,7 @@ import { UpdateProfileDto } from './dtos/update-profile.dto';
 import { FollowUserDto } from './dtos/follow-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
-
+import * as bcrypt from 'bcrypt';
 type UserWithFollowing = User & { isFollowing: boolean };
 
 @Injectable()
@@ -123,5 +123,18 @@ export class UserService {
             .findById(userId)
             .select('following')
             .populate('following', MONGO_SELECT.USER.DEFAULT);
+    }
+
+    async changePassword(newPassword: string, userId: string) {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword,salt);
+        await user.save();
+
+        return 'Success';
     }
 }
