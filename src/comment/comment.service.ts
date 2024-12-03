@@ -149,4 +149,8 @@ export class CommentService {
         return await comment.save();
     }
 
+    async getCommentById(commentId: string) {
+        return (await this.commentModel.findById(commentId).populate('author')).populate('likedBy');
+    }
+
 }

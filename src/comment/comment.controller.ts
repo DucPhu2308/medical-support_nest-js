@@ -37,4 +37,9 @@ export class CommentController {
     async likeComment(@Request() req, @Param('commentId') commentId: string) {
         return this.commentService.likeComment(commentId, req.user.sub);
     }
+
+    @Get("/:commentId")
+    async getComment(@Request() req, @Param('commentId') commentId: string) {
+        return this.commentService.getCommentById(commentId);
+    }   
 }
