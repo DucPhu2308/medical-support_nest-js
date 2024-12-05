@@ -115,12 +115,20 @@ export class PostService {
             query.content = { $regex: filterDto.content, $options: 'i' };
         }
 
+        if (filterDto.tagId) {
+            query.tags = { $in: [new Types.ObjectId(filterDto.tagId)] };
+        }
+
+        
+        
+
         return await this.postModel.find(query)
             .populate('author', MONGO_SELECT.USER.DEFAULT)
             .populate('likedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('lovedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('surprisedBy', MONGO_SELECT.USER.DEFAULT)
             .populate('tags', MONGO_SELECT.SPECIALITY.DEFAULT)
+            
     }
 
     async getPostBySearchPagination(filterDto: GetPostFillterDto, page: number, limit: number) {
@@ -151,6 +159,15 @@ export class PostService {
             }
         }
 
+        if (filterDto.createdAtFrom || filterDto.createdAtTo) {
+            query.createdAt = {};
+            if (filterDto.createdAtFrom) {
+                query.createdAt.$gte = new Date(filterDto.createdAtFrom);
+            }
+            if (filterDto.createdAtTo) {
+                query.createdAt.$lte = new Date(filterDto.createdAtTo);
+            }
+        }
 
         let mongoQuery = this.postModel.find(query)
             .populate('author', MONGO_SELECT.USER.DEFAULT)
@@ -165,6 +182,93 @@ export class PostService {
 
         // Execute the query and return the result
         return await mongoQuery.exec();
+    }
+
+    async getPostByMonthYear(month: number, year: number) {
+        try {
+            // Create a start and end date for the specified month
+            const startDate = new Date(year, month - 1, 1); // Start of the month
+            const endDate = new Date(year, month, 0); // End of the month (last day of the month)
+    
+            // Generate an array of all dates in the month
+            const allDates = [];
+            for (let day = 1; day <= endDate.getDate(); day++) {
+                const date = new Date(year, month - 1, day);
+                allDates.push(date.toISOString().split('T')[0]); // Convert to YYYY-MM-DD format
+            }
+    
+            // Fetch post counts grouped by day within the given month
+            const results = await this.postModel.aggregate([
+                {
+                    $match: {
+                        createdAt: {
+                            $gte: startDate, // Greater than or equal to the start date
+                            $lte: endDate,   // Less than or equal to the end date
+                        },
+                    },
+                },
+                {
+                    $group: {
+                        _id: {
+                            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }, // Group by day
+                        },
+                        count: { $sum: 1 }, // Count the number of posts per day
+                    },
+                },
+                {
+                    $sort: { _id: 1 }, // Sort by date ascending
+                },
+            ]);
+    
+            // Map results to a dictionary with date as key
+            const resultMap = results.reduce((acc, item) => {
+                acc[item._id] = item.count;
+                return acc;
+            }, {});
+    
+            // For each date in the month, return the count or 0 if no posts exist for that day
+            const formattedResults = allDates.map(date => ({
+                date,
+                count: resultMap[date] || 0, // Use the count from the result or 0 if no posts
+            }));
+    
+            return formattedResults;
+        } catch (error) {
+            console.error("Error in getPostStartByDay:", error);
+            throw error;
+        }
+    }
+
+    async getPostsByTag() {    
+        // dữ liệu trả về sẽ là [{name: 'tag1', count: 5}, {name: 'tag2', count: 3}, ...]
+        return await this.postModel.aggregate([
+            {
+                $unwind: "$tags" // giải nén mảng tags
+            },
+            {
+                $lookup: {
+                    from: "specialities", // collection cần join
+                    localField: "tags", // field trong collection hiện tại
+                    foreignField: "_id", // field trong collection join
+                    as: "tag" // alias của collection join
+                }
+            },
+            {
+                $group: {
+                    _id: "$tags", // group theo tag
+                    count: { $sum: 1 }, // đếm số lượng post của mỗi tag
+                    name: { $first: "$tag.name" } // lấy tên của tag
+                }
+            },
+            {
+                $project: {
+                    _id: 0, // không hiển thị _id
+                    name: 1, // hiển thị name
+                    count: 1 // hiển thị count
+                }
+            }
+        ]);
+
     }
 
     async getPostByPostId(postId: string) {

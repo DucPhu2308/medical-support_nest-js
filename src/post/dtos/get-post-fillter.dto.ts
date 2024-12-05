@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsMongoId, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsDate, IsMongoId, IsOptional, IsString } from "class-validator";
 
 
 export class GetPostFillterDto {
@@ -27,4 +28,16 @@ export class GetPostFillterDto {
     @IsString()
     @ApiPropertyOptional()
     tagId?: string;
+
+    @IsOptional()
+    @Type(() => Date)
+    @IsDate()
+    @ApiPropertyOptional({ description: "Ngày bắt đầu" })
+    createdAtFrom?: Date;
+
+    @IsOptional()
+    @Type(() => Date)
+    @IsDate()
+    @ApiPropertyOptional({ description: "Ngày kết thúc" })
+    createdAtTo?: Date;
 }

@@ -18,7 +18,7 @@ enum ReactionType {
 @ApiBearerAuth()
 export class PostController {
     constructor(private readonly postService: PostService) { }
-    
+
     @Post()
     @UseGuards(AuthGuard)
     @UseInterceptors(FilesInterceptor('images'))
@@ -49,11 +49,22 @@ export class PostController {
     // }
 
     @Get('/search')
-    async searchPosts(@Query() query: GetPostFillterDto, 
+    async searchPosts(@Query() query: GetPostFillterDto,
         @Query('page') page: number, @Query('limit') limit: number) {
 
         return this.postService.getPostBySearchPagination(query, page, limit);
     }
+
+    @Get('/getByMonthYear')
+    async getPostByMonthYear(@Query('month') month: number, @Query('year') year: number) {
+        return this.postService.getPostByMonthYear(month, year);
+    }
+
+    @Get('/getByTag')
+    async getPostByTag() {
+        return this.postService.getPostsByTag();
+    }
+
 
     @Put('/like/:postId')
     @UseGuards(AuthGuard)
@@ -69,7 +80,7 @@ export class PostController {
 
     @Put('/reaction/:postId')
     @UseGuards(AuthGuard)
-    @ApiParam({ name: 'postId', type: String})
+    @ApiParam({ name: 'postId', type: String })
     @ApiBody({
         schema: {
             type: 'object',
