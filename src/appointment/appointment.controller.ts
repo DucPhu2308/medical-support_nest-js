@@ -13,6 +13,12 @@ export class AppointmentController {
         return await this.appointmentService.getAppointmentByUserId(req.user.sub, filter);
     }
 
+    @Get('/all')
+    @UseGuards(AuthGuard)
+    async getAllAppointments() {
+        return await this.appointmentService.getAllAppointments();
+    }
+
     @Get(':id')
     @UseGuards(AuthGuard)
     async getAppointmentById(@Param('id') id: string) {

@@ -11,6 +11,9 @@ import { GeneralNotificationDto } from 'src/notification/dtos/general-notificati
 
 @Injectable()
 export class AppointmentService {
+    getAllAppointments() {
+        return this.appointmentModel.find();
+    }
     constructor(
         @InjectModel(Appointment.name) private appointmentModel: Model<Appointment>,
         private readonly notificationService: NotificationService,
