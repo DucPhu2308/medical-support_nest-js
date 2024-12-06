@@ -5,7 +5,7 @@ import { User } from "./user.schema";
 
 @Schema({ timestamps: true })
 export class Comment extends BaseSchema {
-    @Prop({ required: true })
+    @Prop()
     content: string;
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
     author: Types.ObjectId;

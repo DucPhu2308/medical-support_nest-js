@@ -21,6 +21,9 @@ export class CommentService {
     ) { }
 
     async createComment(createCommentDto: CreateCommentPostDto) {
+        if(createCommentDto.content === '' && !createCommentDto.imageContent) {
+            throw new Error('Content or image is required');
+        }
         const currentUser = await this.userModel.findById(createCommentDto.userId);
         if (!currentUser) {
             throw new Error('User not found');

@@ -18,6 +18,12 @@ export class SpectialityService {
         return specialities;
     }
     async createSpeciality(name: string) {
+        // kiem tra xem speciality da ton tai chua
+        const specialityExist = await this.specialityModel
+            .findOne({ name });
+        if (specialityExist) {
+            return { error: 'Speciality already exists' };
+        }
         const speciality = await this.specialityModel.create({
             name
         });

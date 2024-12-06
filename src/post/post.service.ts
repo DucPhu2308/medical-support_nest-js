@@ -10,6 +10,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { Speciality } from 'src/schemas/speciality.schema';
 import { UpdatePostDto } from './dtos/update-post.dto';
 import { User } from 'src/schemas/user.schema';
+import { Comment } from 'src/schemas/comment.schema';
 
 @Injectable()
 export class PostService {
@@ -17,6 +18,7 @@ export class PostService {
         @InjectModel(Post.name) private postModel: Model<Post>,
         @InjectModel(Speciality.name) private specialityModel: Model<Speciality>,
         @InjectModel(User.name) private userModel: Model<User>,
+        @InjectModel(Comment.name) private commentModel: Model<Comment>,
         private readonly firebaseService: FirebaseService,
         private readonly notificationService: NotificationService,
 
@@ -395,6 +397,9 @@ export class PostService {
         if (post.author.toString() !== userId) {
             throw new Error('Unauthorized');
         }
+
+        // Delete comments of the post
+        await this.commentModel.deleteMany({ postId: new Types.ObjectId(postId) });
 
         await this.postModel.deleteOne({ _id: new Types.ObjectId(postId) });
         return 'Delete success';
