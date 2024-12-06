@@ -340,8 +340,12 @@ export class PostService {
         return { message: `Post ${reactionType}d successfully` };
     }
 
-    async updatePost(postId: string, userId: string, updatePostDto: UpdatePostDto) {
-        console.log(updatePostDto);
+    async updateStatusPost(postId: string, userId: string, updatePostDto: UpdatePostDto) {
+        // kiểm tra user có quyền duyệt bài viết không
+        const author = await this.userModel.findById(userId);
+        if (author.doctorInfo.isPermission === false) {
+            throw new Error('Unauthorized');
+        }
         const post = await this.postModel.findById(postId);
         if (!post) {
             throw new Error('Post not found');

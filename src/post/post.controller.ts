@@ -102,10 +102,10 @@ export class PostController {
         return this.postService.handleReaction(postId, userId, body.type);
     }
 
-    @Put('/:postId')
+    @Put('/status/:postId')
     @UseGuards(AuthGuard)
     async updatePost(@Request() req, @Param('postId') postId: string, @Body() updatePostDto: UpdatePostDto) {
-        return this.postService.updatePost(postId, req.user.sub, updatePostDto);
+        return this.postService.updateStatusPost(postId, req.user.sub, updatePostDto);
     }
 
 
