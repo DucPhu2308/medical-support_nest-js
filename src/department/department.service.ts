@@ -41,11 +41,11 @@ export class SpectialityService {
         const doctor = await this.doctorInfoModel.findOne({ specialities : id });
 
         if (post) {
-            return { error: 'Speciality is in use' };
+            return { error: 'Có bài đăng đã sử dụng chủ đề khoa này' };
         }
 
         if(doctor) {
-            return { error: 'Speciality is in use' };
+            return { error: 'Có bác sĩ thuộc khoa này ' };
         }
 
         await this.specialityModel.findByIdAndDelete(id);
