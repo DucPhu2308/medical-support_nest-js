@@ -33,7 +33,6 @@ export class DoctorService {
         const currentDoctor = await this.userModel.findOne({ email: createDoctorDto.email });
         if (currentDoctor) {
             throw new Error('Doctor already exists');
-            return;
         }
 
         const specialities = await this.specialityModel.findById(createDoctorDto.specialty);
@@ -63,6 +62,7 @@ export class DoctorService {
             roles:[UserRole.DOCTOR],
             password: await bcrypt.hash(password, 10),
             avatar: '',
+            bio: '',
 
         };
         
@@ -75,11 +75,11 @@ export class DoctorService {
         const user = await this.userModel.create(newDoctor);
         await user.save();
 
-        await this.mailerService.sendMail({
-            to: createDoctorDto.email,
-            subject: `[${ORG_NAME}] Tài khoản đã được cấp`,
-            text: `Mật khẩu tài khoản: ${password}`,
-        });
+        // await this.mailerService.sendMail({
+        //     to: createDoctorDto.email,
+        //     subject: `[${ORG_NAME}] Tài khoản đã được cấp`,
+        //     text: `Mật khẩu tài khoản: ${password}`,
+        // });
 
         return newDoctor;
     }
