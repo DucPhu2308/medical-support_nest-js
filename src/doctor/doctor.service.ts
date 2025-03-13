@@ -75,11 +75,11 @@ export class DoctorService {
         const user = await this.userModel.create(newDoctor);
         await user.save();
 
-        await this.mailerService.sendMail({
-            to: createDoctorDto.email,
-            subject: `[${ORG_NAME}] Tài khoản đã được cấp`,
-            text: `Mật khẩu tài khoản: ${password}`,
-        });
+        // await this.mailerService.sendMail({
+        //     to: createDoctorDto.email,
+        //     subject: `[${ORG_NAME}] Tài khoản đã được cấp`,
+        //     text: `Mật khẩu tài khoản: ${password}`,
+        // });
 
         return newDoctor;
     }

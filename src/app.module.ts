@@ -16,6 +16,8 @@ import { DoctorModule } from './doctor/doctor.module';
 import { SpectialityModule } from './department/department.module';
 import { NotificationModule } from './notification/notification.module';
 import { BullModule } from '@nestjs/bull';
+import { ShiftModule } from './shift/shift.module';
+import { ShiftAssignmentModule } from './shift-assignment/shift-assignment.module';
 
 @Module({
   imports: [
@@ -47,15 +49,17 @@ import { BullModule } from '@nestjs/bull';
     AppointmentModule,
     DoctorModule,
     SpectialityModule,
-
-    BullModule.forRoot({
-      redis: {
-        host: process.env.REDIS_HOST,
-        port: parseInt(process.env.REDIS_PORT),
-        password: process.env.REDIS_PASSWORD,
-      },
-    }),
+    // BullModule.forRoot({
+    //   redis: {
+    //     host: process.env.REDIS_HOST,
+    //     port: parseInt(process.env.REDIS_PORT),
+    //     password: process.env.REDIS_PASSWORD,
+    //   },
+    // }),
     NotificationModule,
+    ShiftModule,
+    ShiftAssignmentModule,
+    
   ],
   controllers: [AppController],
   providers: [AppService],
