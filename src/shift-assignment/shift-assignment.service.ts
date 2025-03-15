@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { ShiftAssignment } from 'src/schemas/shiftAssignment.schema';
 import { CreateShiftAssignmentDto } from './dtos/create-shift-assignment.dto';
 import { GetShiftAssignmentDto } from './dtos/get-shift-assignment.dto';
+import { DeleteShiftAssignmentDto } from './dtos/delete-shift-assignment.dto';
 
 @Injectable()
 export class ShiftAssignmentService {
@@ -92,8 +93,14 @@ export class ShiftAssignmentService {
             return null; // Trả về null nếu không có người trực
         }
     }
-    
-    
 
 
+    async deleteShiftAssignment(listShiftAssignment: any[]): Promise<any[]> {
+        const deletedShiftAssignment = await Promise.all(listShiftAssignment.map(async (shiftAssignment) => {
+            const { shiftId, date } = shiftAssignment;
+            return this.shiftAssignmentModel.deleteOne({ shift: shiftId, date: date });
+        }));
+        return deletedShiftAssignment;
+
+    }
 }
