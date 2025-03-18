@@ -32,6 +32,11 @@ export class DoctorController {
         return this.doctorService.findAllDoctors();
     }
 
+    @Get('/all/shift')
+    async getAllDoctorsHaveShift() {
+        return this.doctorService.findAllDoctorsHaveShift();
+    }
+
     @Put('/update/permissionDoctor')
     @UseGuards(AuthGuard)
     async updateDoctorPermission(@Body() permissionDoctorDto: PermissionDoctorDto) {

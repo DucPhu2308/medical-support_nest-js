@@ -14,5 +14,9 @@ export class GetShiftAssignmentDto {
     endDate: string;
 
 
+    @ApiProperty()
+    doctorId: string;
+
+
 }
 

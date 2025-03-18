@@ -11,6 +11,7 @@ import { Injectable } from "@nestjs/common";
 import { FirebaseService, UploadFolder } from "src/firebase/firebase.service";
 import { Speciality } from "src/schemas/speciality.schema";
 import { PermissionDoctorDto } from "./dtos/permission-doctor.dto";
+import { ShiftAssignment } from "src/schemas/shiftAssignment.schema";
 
 @Injectable()
 export class DoctorService {
@@ -18,6 +19,7 @@ export class DoctorService {
         @InjectModel(User.name) private userModel: Model<User>,
         @InjectModel(DoctorInfo.name) private doctorModel: Model<DoctorInfo>,
         @InjectModel(Speciality.name) private specialityModel: Model<Speciality>,
+        @InjectModel(ShiftAssignment.name) private shiftAssignmentModel: Model<ShiftAssignment>,
         private readonly mailerService: MailerService,
         private readonly firebaseService: FirebaseService,
     ) { }
@@ -27,6 +29,30 @@ export class DoctorService {
             .select('firstName lastName email gender dob avatar doctorInfo')
             .populate('doctorInfo', 'specialities phone isPermission')
             .populate('doctorInfo.specialities', 'name');
+    }
+
+    async findAllDoctorsHaveShift() {
+        const doctors = await this.userModel.find({ roles: UserRole.DOCTOR })
+            .select('firstName lastName email gender dob avatar doctorInfo')
+            .populate('doctorInfo', 'specialities phone isPermission')
+            .populate('doctorInfo.specialities', 'name');
+        
+        // dữ liệu trả về phải có dạng bác sĩ và ca trực 
+        const doctorsWithShift = [];
+        for (let i = 0; i < doctors.length; i++) {
+            const doctor = doctors[i];
+            const shiftAssignment = await this.shiftAssignmentModel.findOne({ user: doctor._id })
+                .populate('shift', 'name startTime endTime');
+            if (shiftAssignment) {
+                doctorsWithShift.push({
+                    doctor: doctor,
+                    shiftAssignment: shiftAssignment,
+                    
+                });
+            }
+        }
+        return doctorsWithShift;
+
     }
 
     async createDoctor(createDoctorDto: CreateDoctorDto) {
