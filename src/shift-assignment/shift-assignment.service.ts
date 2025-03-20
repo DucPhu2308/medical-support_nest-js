@@ -14,15 +14,25 @@ export class ShiftAssignmentService {
 
     async getShiftAssignments(getShiftAssignmentDto: GetShiftAssignmentDto) {
         if (getShiftAssignmentDto.startDate && getShiftAssignmentDto.endDate) {
+            if(getShiftAssignmentDto.doctorId) {
+                return this.shiftAssignmentModel.find({
+                    date: {
+                        $gte: getShiftAssignmentDto.startDate,
+                        $lte: getShiftAssignmentDto.endDate
+                    },
+                    user: getShiftAssignmentDto.doctorId
+                }).populate('shift').populate('user');
+            }
             return this.shiftAssignmentModel.find({
                 date: {
                     $gte: getShiftAssignmentDto.startDate,
                     $lte: getShiftAssignmentDto.endDate
-                }
+                },
             }).populate('shift').populate('user');
         }
         return null;
     }
+
 
     async createShiftAssignment(createShiftAssignmentDto: CreateShiftAssignmentDto | CreateShiftAssignmentDto[]) {
         if (Array.isArray(createShiftAssignmentDto)) {

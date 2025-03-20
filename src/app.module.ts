@@ -18,6 +18,8 @@ import { NotificationModule } from './notification/notification.module';
 import { BullModule } from '@nestjs/bull';
 import { ShiftModule } from './shift/shift.module';
 import { ShiftAssignmentModule } from './shift-assignment/shift-assignment.module';
+import { RecordPatientModule } from './record-patient/record-patient.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -59,6 +61,8 @@ import { ShiftAssignmentModule } from './shift-assignment/shift-assignment.modul
     NotificationModule,
     ShiftModule,
     ShiftAssignmentModule,
+    RecordPatientModule,
+    PaymentModule,
     
   ],
   controllers: [AppController],
