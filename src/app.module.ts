@@ -52,13 +52,13 @@ import { TimeSlotModule } from './time-slot/time-slot.module';
     AppointmentModule,
     DoctorModule,
     SpectialityModule,
-    // BullModule.forRoot({
-    //   redis: {
-    //     host: process.env.REDIS_HOST,
-    //     port: parseInt(process.env.REDIS_PORT),
-    //     password: process.env.REDIS_PASSWORD,
-    //   },
-    // }),
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST,
+        port: parseInt(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+      },
+    }),
     NotificationModule,
     ShiftModule,
     ShiftAssignmentModule,
