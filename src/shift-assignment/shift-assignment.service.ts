@@ -14,7 +14,7 @@ export class ShiftAssignmentService {
 
     async getShiftAssignments(getShiftAssignmentDto: GetShiftAssignmentDto) {
         if (getShiftAssignmentDto.startDate && getShiftAssignmentDto.endDate) {
-            if(getShiftAssignmentDto.doctorId) {
+            if (getShiftAssignmentDto.doctorId) {
                 return this.shiftAssignmentModel.find({
                     date: {
                         $gte: getShiftAssignmentDto.startDate,
@@ -36,73 +36,82 @@ export class ShiftAssignmentService {
 
     async createShiftAssignment(createShiftAssignmentDto: CreateShiftAssignmentDto | CreateShiftAssignmentDto[]) {
         if (Array.isArray(createShiftAssignmentDto)) {
-            const shiftAssignmentArray = await Promise.all(createShiftAssignmentDto.map(async (shiftAssignment) => {
-                const existingAssignment = await this.shiftAssignmentModel.findOne({
-                    shift: shiftAssignment.shiftId,
-                    date: shiftAssignment.date
+            const receivedAssignments = createShiftAssignmentDto;
+            const receivedKeys = receivedAssignments.map(assignment =>
+                `${assignment.doctorId}-${assignment.shiftId}-${assignment.date}`
+            );
+            const receivedDates = [...new Set(receivedAssignments.map(assignment => assignment.date))];
+
+            // Lấy tất cả các ca trực từ cơ sở dữ liệu theo ngày
+            const existingAssignments = await this.shiftAssignmentModel.find({
+                date: { $in: receivedDates }
+            });
+
+            const existingKeys = existingAssignments.map(assignment =>
+                `${assignment.user}-${assignment.shift}-${assignment.date}`
+            );
+
+            // Lọc các ca trực cần xóa
+            const assignmentsToDelete = existingAssignments.filter(assignment => {
+                const key = `${assignment.user}-${assignment.shift}-${assignment.date}`;
+                return !receivedKeys.includes(key);
+            });
+
+            // Xóa các ca trực cần xóa
+            if (assignmentsToDelete.length > 0) {
+                await this.shiftAssignmentModel.deleteMany({
+                    _id: { $in: assignmentsToDelete.map(assignment => assignment._id) }
                 });
-    
-                if (existingAssignment) {
-                    if (shiftAssignment.doctorId === "") {
-                        // Nếu không có người trực, xóa ca trực đó và trả về null để loại bỏ khỏi mảng insertMany
-                        await this.shiftAssignmentModel.deleteOne({ _id: existingAssignment._id });
-                        return null; 
-                    } else {
-                        // Cập nhật ca trực nếu đã tồn tại và có người trực
-                        existingAssignment.user = new this.shiftAssignmentModel.base.Types.ObjectId(shiftAssignment.doctorId);
-                        return existingAssignment.save();
-                    }
-                } else if (shiftAssignment.doctorId !== "") {
-                    // Tạo mới nếu không tồn tại và có người trực
+            }
+
+
+            // Lấy tất cả các ngày trong tháng từ danh sách Dto
+            const allDatesInMonth = new Set(receivedAssignments.map(a => a.date.substring(0, 7)));
+
+            // Tìm các ngày không có trong danh sách được truyền vào
+            const remainingAssignments = await this.shiftAssignmentModel.find({
+                date: { $regex: `^(${Array.from(allDatesInMonth).join('|')})` }
+            });
+
+            const datesToDelete = remainingAssignments.filter(assignment => !receivedDates.includes(assignment.date));
+
+            // Xóa các ca trực trong những ngày không tồn tại trong Dto
+            if (datesToDelete.length > 0) {
+                await this.shiftAssignmentModel.deleteMany({
+                    _id: { $in: datesToDelete.map(assignment => assignment._id) }
+                });
+            }
+
+
+
+            // Chuẩn bị các ca trực mới để thêm hoặc cập nhật
+            const bulkOperations = receivedAssignments.map(assignment => {
+                const key = `${assignment.doctorId}-${assignment.shiftId}-${assignment.date}`;
+
+                if (!existingKeys.includes(key)) {
                     return {
-                        shift: shiftAssignment.shiftId,
-                        user: shiftAssignment.doctorId,
-                        date: shiftAssignment.date
+                        insertOne: {
+                            document: {
+                                user: assignment.doctorId,
+                                shift: assignment.shiftId,
+                                date: assignment.date
+                            }
+                        }
                     };
                 }
-                return null; // Bỏ qua nếu không có người trực
-            }));
-    
-            // Lọc ra những ca hợp lệ để thêm vào DB
-            const validShiftAssignments = shiftAssignmentArray.filter(item => item && !(item instanceof this.shiftAssignmentModel));
-            
-            // Chỉ insert những ca hợp lệ
-            if (validShiftAssignments.length > 0) {
-                return this.shiftAssignmentModel.insertMany(validShiftAssignments);
+                return null;
+            }).filter(Boolean); // Loại bỏ các giá trị null
+
+            // Thực hiện thêm hoặc cập nhật ca trực
+            if (bulkOperations.length > 0) {
+                await this.shiftAssignmentModel.bulkWrite(bulkOperations);
             }
-            
-            return []; // Trả về mảng rỗng nếu không có ca hợp lệ nào để thêm
-        } else {
-            // Xử lý trường hợp truyền vào là một đối tượng duy nhất
-            const { shiftId, doctorId, date } = createShiftAssignmentDto;
-    
-            const existingAssignment = await this.shiftAssignmentModel.findOne({
-                shift: shiftId,
-                date: date
-            });
-    
-            if (existingAssignment) {
-                if (doctorId === "") {
-                    // Nếu không có người trực, xóa ca trực đó
-                    await this.shiftAssignmentModel.deleteOne({ _id: existingAssignment._id });
-                    return null;
-                } else {
-                    // Cập nhật ca trực nếu đã tồn tại và có người trực
-                    existingAssignment.user = new this.shiftAssignmentModel.base.Types.ObjectId(doctorId);
-                    return existingAssignment.save();
-                }
-            } else if (doctorId !== "") {
-                // Tạo mới nếu không tồn tại và có người trực
-                return this.shiftAssignmentModel.create({
-                    shift: shiftId,
-                    user: doctorId,
-                    date: date
-                });
-            }
-    
-            return null; // Trả về null nếu không có người trực
+
+            return { message: "Cập nhật ca trực thành công!" };
         }
     }
+
+
 
 
     async deleteShiftAssignment(listShiftAssignment: any[]): Promise<any[]> {

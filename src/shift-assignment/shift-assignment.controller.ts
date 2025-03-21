@@ -25,7 +25,6 @@ export class ShiftAssignmentController {
     @Post('/create')
     @UseGuards(AuthGuard)
     async createShiftAssignment(@Request() req, @Body()createShiftAssignmentDto: CreateShiftAssignmentDto | CreateShiftAssignmentDto[]) {
-
         return this.shiftAssignmentService.createShiftAssignment(createShiftAssignmentDto);
     }
 
