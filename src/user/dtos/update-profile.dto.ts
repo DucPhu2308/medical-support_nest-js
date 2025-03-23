@@ -18,4 +18,6 @@ export class UpdateProfileDto {
     dob: Date;
     @ApiProperty()
     bio: string;
+
+    
 }

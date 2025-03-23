@@ -55,7 +55,6 @@ export class UserController {
     @ApiConsumes('multipart/form-data')
     async updateProfile(@Request() req, @Body() updateProfileDto: UpdateProfileDto,
         @UploadedFile() file: Express.Multer.File) {
-        
         if (file !== undefined) {
             updateProfileDto.avatar = file;
         }

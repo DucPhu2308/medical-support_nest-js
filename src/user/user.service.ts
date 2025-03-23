@@ -8,12 +8,14 @@ import { FollowUserDto } from './dtos/follow-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { FirebaseService, UploadFolder } from 'src/firebase/firebase.service';
 import * as bcrypt from 'bcrypt';
+import { DoctorInfo } from 'src/schemas/doctor-info.schema';
 type UserWithFollowing = User & { isFollowing: boolean };
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel(User.name) private readonly userModel: Model<User>,
+        @InjectModel(DoctorInfo.name) private readonly doctorInfoModel: Model<DoctorInfo>,
         private readonly firebaseService: FirebaseService,
     ) { }
 
@@ -79,6 +81,7 @@ export class UserService {
             const avatar = await this.firebaseService.uploadFile(file, UploadFolder.POST);
             user.avatar = avatar; // Cập nhật avatar mới cho user
         }
+
 
         // Cập nhật các thông tin khác từ DTO nếu cần
         Object.keys(data).forEach((key) => {

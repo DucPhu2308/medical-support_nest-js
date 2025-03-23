@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { Types } from "mongoose";
+import mongoose, { HydratedDocument, Types } from "mongoose";
 import { Speciality } from "./speciality.schema";
 
 @Schema()
@@ -10,6 +10,11 @@ export class DoctorInfo {
     phone: string;
     @Prop({ default: false })
     isPermission: boolean;
+    @Prop()
+    treatmentDescription: string;
+
 }
 
 export const DoctorInfoSchema = SchemaFactory.createForClass(DoctorInfo);
+
+export type DoctorInfoDocument = HydratedDocument<DoctorInfo>;

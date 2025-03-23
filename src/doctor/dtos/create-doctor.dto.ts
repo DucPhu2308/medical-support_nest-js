@@ -37,4 +37,9 @@ export class CreateDoctorDto {
     avatar: Express.Multer.File;
 
 
+    @ApiProperty()
+    @IsOptional()
+    treatmentDescriptionDoctor: string;
+
+
 }

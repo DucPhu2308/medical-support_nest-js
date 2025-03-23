@@ -34,16 +34,17 @@ export class DoctorService {
     async findAllDoctorsHaveShift() {
         const doctors = await this.userModel.find({ roles: UserRole.DOCTOR })
             .select('firstName lastName email gender dob avatar doctorInfo')
-            .populate('doctorInfo', 'specialities phone isPermission')
+            .populate('doctorInfo', 'specialities phone isPermission treatmentDescription')
             .populate('doctorInfo.specialities', 'name');
+            
         
         // dữ liệu trả về phải có dạng bác sĩ và ca trực 
         const doctorsWithShift = [];
         for (let i = 0; i < doctors.length; i++) {
             const doctor = doctors[i];
-            const shiftAssignment = await this.shiftAssignmentModel.findOne({ user: doctor._id })
+            const shiftAssignment = await this.shiftAssignmentModel.find({ user: doctor._id })
                 .populate('shift', 'name startTime endTime');
-            if (shiftAssignment) {
+            if (shiftAssignment && shiftAssignment.length > 0) {
                 doctorsWithShift.push({
                     doctor: doctor,
                     shiftAssignment: shiftAssignment,
@@ -51,7 +52,9 @@ export class DoctorService {
                 });
             }
         }
+
         return doctorsWithShift;
+
 
     }
 
@@ -66,6 +69,7 @@ export class DoctorService {
             specialities: [specialities._id],
             phone: createDoctorDto.phone,
             isPermission: false,
+            treatmentDescription: createDoctorDto.treatmentDescriptionDoctor || null,
         });
 
 
@@ -78,10 +82,10 @@ export class DoctorService {
             firstName: createDoctorDto.firstName,
             lastName: createDoctorDto.lastName,
             doctorInfo: {
-                _id: newDoctorInfo._id,
-                specialities: newDoctorInfo.specialities,
-                phone: newDoctorInfo.phone,
-                isPermission: newDoctorInfo.isPermission,
+                specialities: [specialities._id],
+                phone: createDoctorDto.phone,
+                isPermission: false,
+                treatmentDescription: createDoctorDto.treatmentDescriptionDoctor || null,
             },
             gender: createDoctorDto.gender,
             isActive: true,
@@ -101,11 +105,11 @@ export class DoctorService {
         const user = await this.userModel.create(newDoctor);
         await user.save();
 
-        // await this.mailerService.sendMail({
-        //     to: createDoctorDto.email,
-        //     subject: `[${ORG_NAME}] Tài khoản đã được cấp`,
-        //     text: `Mật khẩu tài khoản: ${password}`,
-        // });
+        await this.mailerService.sendMail({
+            to: createDoctorDto.email,
+            subject: `[${ORG_NAME}] Tài khoản đã được cấp`,
+            text: `Mật khẩu tài khoản: ${password}`,
+        });
 
         return newDoctor;
     }
