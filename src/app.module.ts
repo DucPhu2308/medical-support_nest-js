@@ -21,6 +21,7 @@ import { ShiftAssignmentModule } from './shift-assignment/shift-assignment.modul
 import { RecordPatientModule } from './record-patient/record-patient.module';
 import { PaymentModule } from './payment/payment.module';
 import { TimeSlotModule } from './time-slot/time-slot.module';
+import { ResultRegistrationModule } from './result-registration/result-registration.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { TimeSlotModule } from './time-slot/time-slot.module';
     RecordPatientModule,
     PaymentModule,
     TimeSlotModule,
+    ResultRegistrationModule,
     
   ],
   controllers: [AppController],
