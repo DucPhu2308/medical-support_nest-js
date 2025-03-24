@@ -4,11 +4,13 @@ import { ResultRegistrationController } from './result-registration.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ResultRegistration, ResultRegistrationSchema } from 'src/schemas/resultRegistration.schema';
 import { NotificationModule } from 'src/notification/notification.module';
+import { User, UserSchema } from 'src/schemas/user.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: ResultRegistration.name, schema: ResultRegistrationSchema },
+      { name: User.name, schema: UserSchema },
     ]),
     NotificationModule,
   ],

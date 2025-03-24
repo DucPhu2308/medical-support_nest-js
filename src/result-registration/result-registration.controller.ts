@@ -17,6 +17,12 @@ export class ResultRegistrationController {
         return this.resultRegistrationService.getAllResultRegistration(userId);
     }
 
+    @Get('/detail/:id')
+    @UseGuards(AuthGuard)
+    async getResultRegistrationById(@Param('id') id: string) {
+        return this.resultRegistrationService.getResultRegistrationById(id);
+    }
+
     @Post('/create')
     @UseGuards(AuthGuard)
     async createResultRegistration(@Body() createResultRegistrationDto: CreateResultRegistrationDto) {
