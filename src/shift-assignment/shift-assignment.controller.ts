@@ -5,6 +5,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { GetShiftAssignmentDto } from './dtos/get-shift-assignment.dto';
 import { ShiftAssignment } from 'src/schemas/shiftAssignment.schema';
+import { GetMyShiftsFilterDto } from './dtos/get-my-shifts-filter.dto';
 
 @Controller('/api/shift-assignment')
 @ApiTags('shift-assignment')
@@ -37,7 +38,7 @@ export class ShiftAssignmentController {
 
     @Get('/my-shifts')
     @UseGuards(AuthGuard)
-    async getShiftAssignmentsByDoctorId(@Request() req) {
-        return this.shiftAssignmentService.getShiftAssignmentByDoctorId(req.user.sub);
+    async getShiftAssignmentsByDoctorId(@Request() req, @Query() filter: GetMyShiftsFilterDto) {
+        return this.shiftAssignmentService.getShiftAssignmentByDoctorId(req.user.sub, filter);
     }
 }
