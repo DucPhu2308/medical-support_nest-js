@@ -34,4 +34,10 @@ export class ShiftAssignmentController {
     async deleteShiftAssignment(@Request() req, @Body()shiftAssignmentDto : any[]) {
         return this.shiftAssignmentService.deleteShiftAssignment(shiftAssignmentDto);
     }
+
+    @Get('/my-shifts')
+    @UseGuards(AuthGuard)
+    async getShiftAssignmentsByDoctorId(@Request() req) {
+        return this.shiftAssignmentService.getShiftAssignmentByDoctorId(req.user.sub);
+    }
 }

@@ -105,4 +105,11 @@ export class ShiftAssignmentService {
         return deletedShiftAssignment;
 
     }
+
+    async getShiftAssignmentByDoctorId(doctorId: string) {
+        return this.shiftAssignmentModel
+            .find({ user: doctorId })
+            .populate('shift', 'name startTime endTime');
+    }
+
 }
