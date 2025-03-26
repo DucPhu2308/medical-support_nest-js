@@ -35,4 +35,16 @@ export class RecordPatientService {
         return this.recordPatientModel.findByIdAndDelete(recordPatientId);
     }
 
+    async searchRecordPatient(search: string) {
+        // search theo tên bệnh nhân hoặc số điện thoại
+        // nếu là sdt thì phải đúng chính xác
+        // nếu là tên thì có thể đúng một phần, không phân biệt hoa thường
+        return this.recordPatientModel.find({
+            $or: [
+                { name: { $regex: search, $options: 'i' } },
+                { phoneNumber: search }
+            ]
+        });
+    }
+
 }
