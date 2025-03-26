@@ -22,6 +22,7 @@ import { RecordPatientModule } from './record-patient/record-patient.module';
 import { PaymentModule } from './payment/payment.module';
 import { ResultRegistrationModule } from './result-registration/result-registration.module';
 import { ShiftSegmentModule } from './shift-segment/shift-segment.module';
+import { MedExamServiceModule } from './med-exam-service/med-exam-service.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { ShiftSegmentModule } from './shift-segment/shift-segment.module';
     PaymentModule,
     ResultRegistrationModule,
     ShiftSegmentModule,
+    MedExamServiceModule,
     
   ],
   controllers: [AppController],
