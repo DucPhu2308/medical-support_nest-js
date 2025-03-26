@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { RecordPatientService } from './record-patient.service';
 import { ApiBasicAuth, ApiTags } from '@nestjs/swagger';
 import { CreateRecordPatientDto } from './dtos/create-record-patient.dto';
@@ -39,5 +39,10 @@ export class RecordPatientController {
     @UseGuards(AuthGuard)
     async deleteRecordPatient(@Param('recordPatientId') recordPatientId: string) {
         return this.recordPatientService.deleteRecordPatient(recordPatientId);
+    }
+
+    @Get("/search")
+    async searchRecordPatient(@Query('q') search: string) {
+        return this.recordPatientService.searchRecordPatient(search);
     }
 }
