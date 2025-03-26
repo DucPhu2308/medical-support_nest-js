@@ -3,7 +3,9 @@ import { IsNotEmpty } from "class-validator";
 
 
 
-export class CreateTimeSlotDto {
+
+export class CreateShiftSegmentDto {
+
     @ApiProperty()
     @IsNotEmpty()
     startTime: string;
@@ -19,5 +21,5 @@ export class CreateTimeSlotDto {
     @ApiProperty()
     @IsNotEmpty()
     maxRegistrations: number;
-}
 
+}   

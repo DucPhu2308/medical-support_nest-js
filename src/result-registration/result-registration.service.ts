@@ -5,19 +5,22 @@ import { ResultRegistration } from 'src/schemas/resultRegistration.schema';
 import { CreateResultRegistrationDto } from './dtos/create-result-registration.dto';
 import { NotificationService } from 'src/notification/notification.service';
 import { User } from 'src/schemas/user.schema';
+import { ShiftSegmentService } from 'src/shift-segment/shift-segment.service';
+
 
 @Injectable()
 export class ResultRegistrationService {
     constructor(
         @InjectModel(ResultRegistration.name) private resultRegistrationModel: Model<ResultRegistration>,
         @InjectModel(User.name) private userModel: Model<User>,
+        private readonly shiftSegmentService: ShiftSegmentService,
         private readonly notificationService: NotificationService,
     ) { }
 
     async getResultRegistrationById(id: string) {
         return this.resultRegistrationModel.findById(id)
             .populate({
-                path: 'timeSlot',
+                path: 'shiftSegment',
                 select: 'startTime endTime date'
             })
             .populate({
@@ -41,7 +44,7 @@ export class ResultRegistrationService {
     async getAllResultRegistration(userId: string) {
         return this.resultRegistrationModel.find({ user: userId })
             .populate({
-                path: 'timeSlot',
+                path: 'shiftSegment',
                 select: 'startTime endTime date'
             })
             .populate({
@@ -68,6 +71,11 @@ export class ResultRegistrationService {
 
         const doctor = await this.userModel.findById(createResultRegistrationDto.doctor);
 
+        const shiftSegment = await this.shiftSegmentService.updateCurrentRegistrations(createResultRegistrationDto.shiftSegment);
+        console.log(shiftSegment._id);
+        if (!shiftSegment) {
+            throw new Error('Shift segment is full');
+        }
         this.notificationService.createGeneralNotification({
             recipient: createResultRegistrationDto.user,
             content: `Bạn đã đặt lịch khám thành công với bác sĩ ${doctor.firstName} ${doctor.lastName}`,

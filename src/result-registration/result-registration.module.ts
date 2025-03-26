@@ -5,6 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ResultRegistration, ResultRegistrationSchema } from 'src/schemas/resultRegistration.schema';
 import { NotificationModule } from 'src/notification/notification.module';
 import { User, UserSchema } from 'src/schemas/user.schema';
+import { ShiftSegmentModule } from 'src/shift-segment/shift-segment.module';
+
 
 @Module({
   imports: [
@@ -12,6 +14,7 @@ import { User, UserSchema } from 'src/schemas/user.schema';
       { name: ResultRegistration.name, schema: ResultRegistrationSchema },
       { name: User.name, schema: UserSchema },
     ]),
+    ShiftSegmentModule,
     NotificationModule,
   ],
   providers: [ResultRegistrationService],

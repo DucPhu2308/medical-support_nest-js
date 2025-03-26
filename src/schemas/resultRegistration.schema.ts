@@ -15,8 +15,8 @@ export class ResultRegistration extends BaseSchema {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
     user: mongoose.Types.ObjectId;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'TimeSlot' })
-    timeSlot: mongoose.Types.ObjectId;
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ShiftSegment' })
+    shiftSegment: mongoose.Types.ObjectId;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'RecordPatient' })
     recordPatient: mongoose.Types.ObjectId;

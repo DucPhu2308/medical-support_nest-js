@@ -19,7 +19,7 @@ export class CreateResultRegistrationDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    timeSlot: string;
+    shiftSegment: string;
 
     @ApiProperty()
     @IsNotEmpty()

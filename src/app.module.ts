@@ -20,8 +20,8 @@ import { ShiftModule } from './shift/shift.module';
 import { ShiftAssignmentModule } from './shift-assignment/shift-assignment.module';
 import { RecordPatientModule } from './record-patient/record-patient.module';
 import { PaymentModule } from './payment/payment.module';
-import { TimeSlotModule } from './time-slot/time-slot.module';
 import { ResultRegistrationModule } from './result-registration/result-registration.module';
+import { ShiftSegmentModule } from './shift-segment/shift-segment.module';
 
 @Module({
   imports: [
@@ -65,8 +65,8 @@ import { ResultRegistrationModule } from './result-registration/result-registrat
     ShiftAssignmentModule,
     RecordPatientModule,
     PaymentModule,
-    TimeSlotModule,
     ResultRegistrationModule,
+    ShiftSegmentModule,
     
   ],
   controllers: [AppController],

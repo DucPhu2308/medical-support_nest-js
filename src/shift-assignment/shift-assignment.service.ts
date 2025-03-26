@@ -5,11 +5,13 @@ import { ShiftAssignment } from 'src/schemas/shiftAssignment.schema';
 import { CreateShiftAssignmentDto } from './dtos/create-shift-assignment.dto';
 import { GetShiftAssignmentDto } from './dtos/get-shift-assignment.dto';
 import { DeleteShiftAssignmentDto } from './dtos/delete-shift-assignment.dto';
+import { ShiftSegment } from 'src/schemas/shiftSegment.schema';
 
 @Injectable()
 export class ShiftAssignmentService {
     constructor(
         @InjectModel(ShiftAssignment.name) private readonly shiftAssignmentModel: Model<ShiftAssignment>
+        
     ) { }
 
     async getShiftAssignments(getShiftAssignmentDto: GetShiftAssignmentDto) {

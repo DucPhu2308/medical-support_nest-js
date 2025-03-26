@@ -3,6 +3,7 @@ import { ShiftAssignmentService } from './shift-assignment.service';
 import { ShiftAssignmentController } from './shift-assignment.controller';
 import { ShiftAssignment, ShiftAssignmentSchema } from 'src/schemas/shiftAssignment.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ShiftSegment, ShiftSegmentSchema } from 'src/schemas/shiftSegment.schema';
 
 
 @Module({
