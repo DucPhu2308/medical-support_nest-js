@@ -12,6 +12,7 @@ import { FirebaseService, UploadFolder } from "src/firebase/firebase.service";
 import { Speciality } from "src/schemas/speciality.schema";
 import { PermissionDoctorDto } from "./dtos/permission-doctor.dto";
 import { ShiftAssignment } from "src/schemas/shiftAssignment.schema";
+import { GetDoctorHaveShiftDto } from "./dtos/get-doctor-have-shift.dto";
 
 @Injectable()
 export class DoctorService {
@@ -36,27 +37,74 @@ export class DoctorService {
             .select('firstName lastName email gender dob avatar doctorInfo')
             .populate('doctorInfo', 'specialities phone isPermission treatmentDescription')
             .populate('doctorInfo.specialities', 'name');
-            
-        
+
+        const today = new Date(new Date().toISOString().substring(0, 10));
+
         // dữ liệu trả về phải có dạng bác sĩ và ca trực 
         const doctorsWithShift = [];
         for (let i = 0; i < doctors.length; i++) {
             const doctor = doctors[i];
             const shiftAssignment = await this.shiftAssignmentModel.find({ user: doctor._id })
                 .populate('shift', 'name startTime endTime');
-            if (shiftAssignment && shiftAssignment.length > 0) {
+
+            // Kiểm tra nếu có ít nhất một ca trực trong ngày hôm nay hoặc tương lai
+            const hasValidShift = shiftAssignment.some(shift => new Date(shift.date) >= today);
+
+            if (hasValidShift) {
                 doctorsWithShift.push({
                     doctor: doctor,
-                    shiftAssignment: shiftAssignment,
-                    
+                    shiftAssignment: shiftAssignment
                 });
             }
         }
 
         return doctorsWithShift;
-
-
     }
+
+    async findDoctorsHaveShift(GetDoctorHaveShiftDto: GetDoctorHaveShiftDto) {
+        const { day, month, year, specialtyId } = GetDoctorHaveShiftDto;
+        const today = new Date(new Date().toISOString().substring(0, 10));
+
+        // Lấy danh sách bác sĩ
+        const doctors = await this.userModel.find({ roles: UserRole.DOCTOR })
+            .select('firstName lastName email gender dob avatar doctorInfo')
+            .populate('doctorInfo', 'specialities phone isPermission treatmentDescription')
+            .populate('doctorInfo.specialities', 'name');
+
+        // Xây dựng date dạng "YYYY-MM-DD"
+        const date = new Date(Date.UTC(year, month - 1, day)).toISOString().substring(0, 10);
+
+        // Lấy danh sách ca trực trong ngày
+        const shiftAssignments = await this.shiftAssignmentModel.find({
+            date: date,
+        }).populate('user', 'firstName lastName email doctorInfo');
+
+        // Lọc danh sách bác sĩ có ca trực
+        let doctorsWithShift = doctors.filter(doctor =>
+            shiftAssignments.some(shift => shift.user._id.toString() === doctor._id.toString())
+        );
+
+        // Nếu có specialtyId, lọc theo chuyên khoa
+        if (specialtyId) {
+            doctorsWithShift = doctorsWithShift.filter(doctor =>
+                doctor.doctorInfo && doctor.doctorInfo.specialities.some(speciality => speciality._id.toString() === specialtyId)
+            );
+        }
+
+        // Tạo danh sách bác sĩ với ca trực hợp lệ (>= hôm nay)
+        return doctorsWithShift
+            .map(doctor => {
+                const assignedShifts = shiftAssignments.filter(shift =>
+                    shift.user._id.toString() === doctor._id.toString() &&
+                    new Date(shift.date) >= today
+                );
+
+                return assignedShifts.length > 0 ? { doctor, shiftAssignment: assignedShifts } : null;
+            })
+            .filter(entry => entry !== null); // Loại bỏ các bác sĩ không có ca trực hợp lệ
+    }
+
+
 
     async createDoctor(createDoctorDto: CreateDoctorDto) {
         const currentDoctor = await this.userModel.findOne({ email: createDoctorDto.email });
@@ -89,13 +137,13 @@ export class DoctorService {
             },
             gender: createDoctorDto.gender,
             isActive: true,
-            roles:[UserRole.DOCTOR],
+            roles: [UserRole.DOCTOR],
             password: await bcrypt.hash(password, 10),
             avatar: '',
             bio: '',
 
         };
-        
+
         const file = createDoctorDto.avatar;
         if (file) {
             const avatar = await this.firebaseService.uploadFile(file, UploadFolder.POST);
@@ -140,10 +188,10 @@ export class DoctorService {
             { new: true },
         );
 
-        
 
 
-        
+
+
     }
 
 }

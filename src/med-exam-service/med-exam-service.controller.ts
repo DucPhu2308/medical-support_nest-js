@@ -24,11 +24,13 @@ export class MedExamServiceController {
     }
 
     @Put('/update/:id')
+    @UseGuards(AuthGuard)
     async updateMedExamService(@Param("id")id: string, @Body() CreateMedExamServiceDto: CreateMedExamServiceDto) {
         return this.medExamServiceService.updateMedExamService(id, CreateMedExamServiceDto);
     }
 
     @Delete('/delete/:id')
+    @UseGuards(AuthGuard)
     async deleteMedExamService(@Param("id") id: string) {
         return this.medExamServiceService.deleteMedExamService(id);
     }
