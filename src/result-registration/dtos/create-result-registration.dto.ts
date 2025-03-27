@@ -23,7 +23,7 @@ export class CreateResultRegistrationDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    typeService: string;
+    medExamService: string;
 
     @ApiProperty()
     @IsNotEmpty()

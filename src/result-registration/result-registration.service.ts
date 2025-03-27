@@ -25,6 +25,8 @@ export class ResultRegistrationService {
             })
             .populate({
                 path: 'recordPatient',
+            }).populate({
+                path: 'medExamService',
             })
             .populate({
                 path: 'doctor',
@@ -51,6 +53,9 @@ export class ResultRegistrationService {
                 path: 'recordPatient',
             })
             .populate({
+                path: 'medExamService',
+            })
+            .populate({
                 path: 'doctor',
                 select: 'doctorInfo firstName lastName',
                 populate: {
@@ -69,10 +74,12 @@ export class ResultRegistrationService {
     async createResultRegistration(createResultRegistrationDto: CreateResultRegistrationDto) {
         const resultRegistration = new this.resultRegistrationModel(createResultRegistrationDto);
 
+        resultRegistration.isPaid = true;
+
         const doctor = await this.userModel.findById(createResultRegistrationDto.doctor);
 
         const shiftSegment = await this.shiftSegmentService.updateCurrentRegistrations(createResultRegistrationDto.shiftSegment);
-        console.log(shiftSegment._id);
+
         if (!shiftSegment) {
             throw new Error('Shift segment is full');
         }
