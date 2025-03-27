@@ -6,6 +6,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { GetShiftAssignmentDto } from './dtos/get-shift-assignment.dto';
 import { ShiftAssignment } from 'src/schemas/shiftAssignment.schema';
 import { GetMyShiftsFilterDto } from './dtos/get-my-shifts-filter.dto';
+import { ShiftChangeDataDto } from './dtos/shift-change-data.dto';
 
 @Controller('/api/shift-assignment')
 @ApiTags('shift-assignment')
@@ -40,5 +41,12 @@ export class ShiftAssignmentController {
     @UseGuards(AuthGuard)
     async getShiftAssignmentsByDoctorId(@Request() req, @Query() filter: GetMyShiftsFilterDto) {
         return this.shiftAssignmentService.getShiftAssignmentByDoctorId(req.user.sub, filter);
+    }
+
+
+    @Post('/change-shift')
+    @UseGuards(AuthGuard)
+    async changeShift(@Body() shiftChangeData: ShiftChangeDataDto) {
+        return this.shiftAssignmentService.shiftAssignmentChange(shiftChangeData);
     }
 }

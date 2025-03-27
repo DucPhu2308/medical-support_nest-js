@@ -5,6 +5,7 @@ import { ShiftAssignment } from 'src/schemas/shiftAssignment.schema';
 import { CreateShiftAssignmentDto } from './dtos/create-shift-assignment.dto';
 import { GetShiftAssignmentDto } from './dtos/get-shift-assignment.dto';
 import { GetMyShiftsFilterDto } from './dtos/get-my-shifts-filter.dto';
+import { ShiftChangeDataDto } from './dtos/shift-change-data.dto';
 
 @Injectable()
 export class ShiftAssignmentService {
@@ -121,6 +122,40 @@ export class ShiftAssignmentService {
                 }
             })
             .populate('shift', 'name startTime endTime');
+    }
+
+
+
+    async shiftAssignmentChange(shiftChangeDataDto: ShiftChangeDataDto) {
+        const { shiftAssignmentId, currentDoctorId, newDoctorId, date } = shiftChangeDataDto;
+    
+        try {
+            // Kiểm tra ca làm việc có tồn tại không
+            const shiftAssignment = await this.shiftAssignmentModel.findById(shiftAssignmentId);
+            if (!shiftAssignment) {
+                throw new Error('Shift assignment not found');
+            }
+    
+            // Kiểm tra bác sĩ hiện tại có thuộc ca này không
+            if (shiftAssignment.user.toString() !== currentDoctorId) {
+                throw new Error('Current doctor does not match the shift assignment');
+            }
+    
+            // Cập nhật ca làm việc với bác sĩ mới
+            const updateResult = await this.shiftAssignmentModel.updateOne(
+                { _id: shiftAssignmentId },
+                { user: newDoctorId, date: date }
+            );
+    
+            if (updateResult.modifiedCount === 0) {
+                throw new Error('Shift change update failed');
+            }
+    
+            return { success: true, message: 'Shift assignment updated successfully' };
+        } catch (error) {
+            console.error('Shift assignment change error:', error.message);
+            throw new Error(error.message);
+        }
     }
 
 }
