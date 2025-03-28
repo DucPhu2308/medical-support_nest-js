@@ -33,6 +33,11 @@ export class DoctorController {
         return this.doctorService.findAllDoctors();
     }
 
+    @Get('/all/specialty/:specialtyId')
+    async getDoctorBySpecialty(@Param('specialtyId') specialtyId: string) {
+        return this.doctorService.findDoctorBySpecialty(specialtyId);
+    }
+
     @Get('/all/shift')
     async getAllDoctorsHaveShift() {
         return this.doctorService.findAllDoctorsHaveShift();

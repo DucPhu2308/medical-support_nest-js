@@ -32,6 +32,17 @@ export class DoctorService {
             .populate('doctorInfo.specialities', 'name');
     }
 
+    async findDoctorBySpecialty(specialtyId: string) {
+        const doctors = await this.userModel.find({ roles: UserRole.DOCTOR })
+            .populate('doctorInfo', 'specialities phone isPermission')
+            .populate('doctorInfo.specialities', 'name');
+
+        return doctors.filter(doctor =>
+            doctor.doctorInfo && doctor.doctorInfo.specialities.some(speciality => speciality._id.toString() === specialtyId)
+        );
+
+    }
+
     async findAllDoctorsHaveShift() {
         const doctors = await this.userModel.find({ roles: UserRole.DOCTOR })
             .select('firstName lastName email gender dob avatar doctorInfo')

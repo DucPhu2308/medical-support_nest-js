@@ -36,6 +36,34 @@ export class ShiftChangeService {
             });
     }
 
+    async getShiftChangeByUserId(userId: string) {
+        return this.shiftChangeModel.find({
+            $or: [
+                { currentDoctor: userId }
+            ]
+        }).populate({
+            path: 'currentDoctor',
+            populate: {
+                path: 'doctorInfo',
+                populate: { path: 'specialities' }  // Truy xuất chuyên khoa
+            }
+        })
+        .populate({
+            path: 'newDoctor',
+            populate: {
+                path: 'doctorInfo',
+                populate: { path: 'specialities' }  // Truy xuất chuyên khoa
+            }
+        })
+        .populate({
+            path: 'shiftAssignment',
+            populate: {
+                path: 'shift'
+            }
+
+        });
+    }
+
     async createRequestShiftChange(createRequestShiftChangeDto: CreateRequestShiftChangeDto) {
         const newShiftChange = new this.shiftChangeModel({
             currentDoctor: createRequestShiftChangeDto.currentDoctorId,
@@ -45,6 +73,15 @@ export class ShiftChangeService {
             reason: createRequestShiftChangeDto.reason
         });
         return newShiftChange.save();
+    }
+
+    async updateRequestShiftChange(shiftChangeId: string, createRequestShiftChangeDto: CreateRequestShiftChangeDto) {
+        return this.shiftChangeModel.updateOne({ _id: shiftChangeId }, createRequestShiftChangeDto);
+
+    }
+
+    async deleteRequestShiftChange(shiftChangeId: string): Promise<{ deletedCount?: number }> {
+        return this.shiftChangeModel.deleteOne({ _id: shiftChangeId });
     }
 
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { ShiftAssignmentService } from './shift-assignment.service';
 import { CreateShiftAssignmentDto } from './dtos/create-shift-assignment.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -22,6 +22,11 @@ export class ShiftAssignmentController {
         return this.shiftAssignmentService.getShiftAssignments(getShiftAssignmentDto);
     }
 
+    @Get('/all/by-doctor-expect/:doctorId')
+    @UseGuards(AuthGuard)
+    async getShiftAssignmentsByDoctor(@Request() req, @Param('doctorId') doctorId: string) {
+        return this.shiftAssignmentService.getShiftAssignmentsByDoctorExpect(doctorId, req.user.sub);
+    }
    
 
     @Post('/create')

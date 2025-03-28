@@ -11,7 +11,7 @@ import { ShiftChangeDataDto } from './dtos/shift-change-data.dto';
 export class ShiftAssignmentService {
     constructor(
         @InjectModel(ShiftAssignment.name) private readonly shiftAssignmentModel: Model<ShiftAssignment>
-        
+
     ) { }
 
     async getShiftAssignments(getShiftAssignmentDto: GetShiftAssignmentDto) {
@@ -33,6 +33,29 @@ export class ShiftAssignmentService {
             }).populate('shift').populate('user');
         }
         return null;
+    }
+
+    async getShiftAssignmentsByDoctorExpect(doctorId: string, userId: string) {
+        const today = new Date().toISOString().split('T')[0];
+
+        // Lấy tất cả ca trực từ hôm nay trở đi
+        const shiftAssignments = await this.shiftAssignmentModel.find({
+            user: doctorId,
+            date: { $gte: today }
+        }).populate('shift', 'name startTime endTime');
+
+        // Tìm tất cả ca trực trong cùng ngày mà có userId
+        const userShifts = await this.shiftAssignmentModel.find({
+            user: userId,
+            date: { $gte: today }
+        });
+
+        // Lọc bỏ những ca mà userId đã có mặt
+        const filteredAssignments = shiftAssignments.filter(shift =>
+            !userShifts.some(userShift => userShift.date === shift.date)
+        );
+
+        return filteredAssignments;
     }
 
 
@@ -97,8 +120,6 @@ export class ShiftAssignmentService {
 
 
 
-
-
     async deleteShiftAssignment(listShiftAssignment: any[]): Promise<any[]> {
         const deletedShiftAssignment = await Promise.all(listShiftAssignment.map(async (shiftAssignment) => {
             const { shiftId, date } = shiftAssignment;
@@ -128,29 +149,29 @@ export class ShiftAssignmentService {
 
     async shiftAssignmentChange(shiftChangeDataDto: ShiftChangeDataDto) {
         const { shiftAssignmentId, currentDoctorId, newDoctorId, date } = shiftChangeDataDto;
-    
+
         try {
             // Kiểm tra ca làm việc có tồn tại không
             const shiftAssignment = await this.shiftAssignmentModel.findById(shiftAssignmentId);
             if (!shiftAssignment) {
                 throw new Error('Shift assignment not found');
             }
-    
+
             // Kiểm tra bác sĩ hiện tại có thuộc ca này không
             if (shiftAssignment.user.toString() !== currentDoctorId) {
                 throw new Error('Current doctor does not match the shift assignment');
             }
-    
+
             // Cập nhật ca làm việc với bác sĩ mới
             const updateResult = await this.shiftAssignmentModel.updateOne(
                 { _id: shiftAssignmentId },
                 { user: newDoctorId, date: date }
             );
-    
+
             if (updateResult.modifiedCount === 0) {
                 throw new Error('Shift change update failed');
             }
-    
+
             return { success: true, message: 'Shift assignment updated successfully' };
         } catch (error) {
             console.error('Shift assignment change error:', error.message);
