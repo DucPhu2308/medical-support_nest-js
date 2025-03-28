@@ -30,7 +30,7 @@ export class ShiftChange extends BaseSchema{
     @Prop({type: String, enum: Status, default: Status.PENDING})
     status: string;
 
-    @Prop({ type: String, default: '' })
+    @Prop({ type: String, default: null })
     reasonRejected: string;
 
 }

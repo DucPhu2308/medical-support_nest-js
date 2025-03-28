@@ -3,6 +3,7 @@ import { ShiftChangeService } from './shift-change.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateRequestShiftChangeDto } from './dtos/create-request-shift-change.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { StatusRequestDto } from './dtos/status-request.dto';
 
 @Controller('api/shift-change')
 @ApiTags('shift-change')
@@ -32,6 +33,12 @@ export class ShiftChangeController {
     @UseGuards(AuthGuard)
     async updateRequestShiftChange(@Param('id') id: string, @Body() createRequestShiftChangeDto: CreateRequestShiftChangeDto) {
         return await this.shiftChangeService.updateRequestShiftChange(id, createRequestShiftChangeDto);
+    }
+
+    @Put("/rejectRequestShiftChange/:id")
+    @UseGuards(AuthGuard)
+    async rejectRequestShiftChange(@Param('id') id: string, @Body() statusRequestDto: StatusRequestDto) {
+        return await this.shiftChangeService.updateStatusShiftChange(id , statusRequestDto);
     }
 
 

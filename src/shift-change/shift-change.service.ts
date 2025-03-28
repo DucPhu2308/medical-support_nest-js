@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { ShiftChange } from 'src/schemas/shiftChange.schema';
 import { CreateRequestShiftChangeDto } from './dtos/create-request-shift-change.dto';
 import path from 'path';
+import { StatusRequestDto } from './dtos/status-request.dto';
 
 @Injectable()
 export class ShiftChangeService {
@@ -77,7 +78,18 @@ export class ShiftChangeService {
 
     async updateRequestShiftChange(shiftChangeId: string, createRequestShiftChangeDto: CreateRequestShiftChangeDto) {
         return this.shiftChangeModel.updateOne({ _id: shiftChangeId }, createRequestShiftChangeDto);
+    }
 
+    async updateStatusShiftChange(shiftChangeId: string, statusRequest: StatusRequestDto) {
+        const shiftChange = await this.shiftChangeModel.findById(shiftChangeId);
+        if (!shiftChange) {
+            return null;
+        }
+        if (statusRequest.status === 'REJECTED') {
+            shiftChange.reasonRejected = statusRequest.reason;
+        }
+        shiftChange.status = statusRequest.status;
+        return shiftChange.save();
     }
 
     async deleteRequestShiftChange(shiftChangeId: string): Promise<{ deletedCount?: number }> {
