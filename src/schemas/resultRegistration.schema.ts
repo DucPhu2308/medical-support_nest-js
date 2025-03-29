@@ -2,6 +2,12 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
 import { BaseSchema } from "./base.schema";
 
+enum ResultRegistrationStatus {
+    PENDING = 'pending',
+    COMPLETED = 'completed',
+    ABSENT = 'absent',
+    CANCELLED = 'cancelled',
+}
 
 @Schema({timestamps: true})
 export class ResultRegistration extends BaseSchema {
@@ -30,6 +36,8 @@ export class ResultRegistration extends BaseSchema {
     @Prop({ type: String, default: null})
     description: string;
 
+    @Prop({ type: String, enum: ResultRegistrationStatus, default: ResultRegistrationStatus.PENDING })
+    status: ResultRegistrationStatus;
 }
 
 export const ResultRegistrationSchema = SchemaFactory.createForClass(ResultRegistration);
