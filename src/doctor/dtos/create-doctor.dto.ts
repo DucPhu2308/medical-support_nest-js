@@ -39,7 +39,11 @@ export class CreateDoctorDto {
 
     @ApiProperty()
     @IsOptional()
-    treatmentDescriptionDoctor: string;
+    treatment: string;
+
+    @ApiProperty()
+    @IsOptional()
+    description: string;
 
 
 }

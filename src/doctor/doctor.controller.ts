@@ -6,12 +6,13 @@ import { CreateDoctorDto } from './dtos/create-doctor.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PermissionDoctorDto } from './dtos/permission-doctor.dto';
 import { GetDoctorHaveShiftDto } from './dtos/get-doctor-have-shift.dto';
+import { UpdateDoctorInfoDto } from './dtos/update-doctorInfo.dto';
 
 @Controller('api/doctor')
 @ApiTags('doctor')
 @ApiBearerAuth()
 export class DoctorController {
-    constructor(private readonly doctorService: DoctorService){}
+    constructor(private readonly doctorService: DoctorService) { }
 
     @Post('/create')
     @UseGuards(AuthGuard)
@@ -19,12 +20,12 @@ export class DoctorController {
     @ApiBearerAuth()
     @ApiConsumes('multipart/form-data')
     async createDoctor(@Body() createDoctorDto: CreateDoctorDto,
-            @UploadedFile() file: Express.Multer.File) {
+        @UploadedFile() file: Express.Multer.File) {
         if (file !== undefined) {
             createDoctorDto.avatar = file;
         }
         return this.doctorService.createDoctor(createDoctorDto);
-        
+
     }
 
 
@@ -52,5 +53,11 @@ export class DoctorController {
     @UseGuards(AuthGuard)
     async updateDoctorPermission(@Body() permissionDoctorDto: PermissionDoctorDto) {
         return this.doctorService.updateDoctorPermission(permissionDoctorDto);
+    }
+
+    @Put('/updateDoctorInfo/:doctorId')
+    @UseGuards(AuthGuard)
+    async updateDoctorInfo(@Param('doctorId') doctorId: string, @Body() updateDoctorInfoDto: UpdateDoctorInfoDto) {
+        return this.doctorService.updateDoctorInfo(doctorId, updateDoctorInfoDto);
     }
 }

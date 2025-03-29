@@ -10,8 +10,10 @@ export class DoctorInfo {
     phone: string;
     @Prop({ default: false })
     isPermission: boolean;
-    @Prop()
-    treatmentDescription: string;
+    @Prop({ default: null })
+    treatment: string;
+    @Prop({default: null })
+    description: string;
 
 }
 

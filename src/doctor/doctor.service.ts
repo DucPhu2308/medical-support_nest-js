@@ -13,6 +13,7 @@ import { Speciality } from "src/schemas/speciality.schema";
 import { PermissionDoctorDto } from "./dtos/permission-doctor.dto";
 import { ShiftAssignment } from "src/schemas/shiftAssignment.schema";
 import { GetDoctorHaveShiftDto } from "./dtos/get-doctor-have-shift.dto";
+import { UpdateDoctorInfoDto } from "./dtos/update-doctorInfo.dto";
 
 @Injectable()
 export class DoctorService {
@@ -46,7 +47,7 @@ export class DoctorService {
     async findAllDoctorsHaveShift() {
         const doctors = await this.userModel.find({ roles: UserRole.DOCTOR })
             .select('firstName lastName email gender dob avatar doctorInfo')
-            .populate('doctorInfo', 'specialities phone isPermission treatmentDescription')
+            .populate('doctorInfo', 'specialities phone isPermission treatment description')
             .populate('doctorInfo.specialities', 'name');
 
         const today = new Date(new Date().toISOString().substring(0, 10));
@@ -79,7 +80,7 @@ export class DoctorService {
         // Lấy danh sách bác sĩ
         const doctors = await this.userModel.find({ roles: UserRole.DOCTOR })
             .select('firstName lastName email gender dob avatar doctorInfo')
-            .populate('doctorInfo', 'specialities phone isPermission treatmentDescription')
+            .populate('doctorInfo', 'specialities phone isPermission treatment description')
             .populate('doctorInfo.specialities', 'name');
 
         // Xây dựng date dạng "YYYY-MM-DD"
@@ -128,7 +129,8 @@ export class DoctorService {
             specialities: [specialities._id],
             phone: createDoctorDto.phone,
             isPermission: false,
-            treatmentDescription: createDoctorDto.treatmentDescriptionDoctor || null,
+            treatment: createDoctorDto.treatment || null,
+            description: createDoctorDto.description || null,
         });
 
 
@@ -144,7 +146,8 @@ export class DoctorService {
                 specialities: [specialities._id],
                 phone: createDoctorDto.phone,
                 isPermission: false,
-                treatmentDescription: createDoctorDto.treatmentDescriptionDoctor || null,
+                treatment: newDoctorInfo.treatment || null,
+                description: newDoctorInfo.description || null,
             },
             gender: createDoctorDto.gender,
             isActive: true,
@@ -199,10 +202,36 @@ export class DoctorService {
             { new: true },
         );
 
+    }
 
+    async updateDoctorInfo(doctorId: string, updateDoctorInfoDto: UpdateDoctorInfoDto) {
+        const doctor = await this.userModel.findById(doctorId);
+        if (!doctor) {
+            throw new Error('Doctor not found');
+        }
 
+        doctor.doctorInfo.treatment = updateDoctorInfoDto.treatment || doctor.doctorInfo.treatment;
+        doctor.doctorInfo.description = updateDoctorInfoDto.description || doctor.doctorInfo.description;
+        doctor.doctorInfo.phone = updateDoctorInfoDto.phone || doctor.doctorInfo.phone;
 
+        const request= this.userModel.findByIdAndUpdate(
+            doctorId,   
+            {
+                $set: {
+                    'doctorInfo.treatment': doctor.doctorInfo.treatment,
+                    'doctorInfo.description': doctor.doctorInfo.description,
+                    'doctorInfo.phone': doctor.doctorInfo.phone,
+                },
+            },
+            { new: true },
+        ); 
 
+        // chỉ lấy doctorInfo
+        const updatedDoctor = await request.populate('doctorInfo', 'specialities phone isPermission treatment description')
+            .populate('doctorInfo.specialities', 'name')
+            .exec();
+
+        return updatedDoctor.doctorInfo;
     }
 
 }

@@ -62,7 +62,7 @@ export class UserService {
             .findById(userId)
             .select(MONGO_SELECT.USER.DEFAULT)
             .populate('following', MONGO_SELECT.USER.DEFAULT)
-            .populate('doctorInfo', 'specialities phone isPermission')
+            .populate('doctorInfo', 'specialities phone isPermission treatment description')
             .populate('doctorInfo.specialities', 'name');
     }
 

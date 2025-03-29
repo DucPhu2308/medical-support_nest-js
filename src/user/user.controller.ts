@@ -58,7 +58,6 @@ export class UserController {
         if (file !== undefined) {
             updateProfileDto.avatar = file;
         }
-        
         return this.userService.updateProfile(req.user.sub, updateProfileDto);
     }
 
