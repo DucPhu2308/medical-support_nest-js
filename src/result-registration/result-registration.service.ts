@@ -6,7 +6,10 @@ import { CreateResultRegistrationDto } from './dtos/create-result-registration.d
 import { NotificationService } from 'src/notification/notification.service';
 import { User } from 'src/schemas/user.schema';
 import { ShiftSegmentService } from 'src/shift-segment/shift-segment.service';
+import { GetResultRegistrationByFilterDto } from './dtos/get-result-registration-by-filter.dto';
+import { ShiftSegment } from 'src/schemas/shiftSegment.schema';
 
+type ResultRegistrationWithShiftSegment = ResultRegistration & { shiftSegment: ShiftSegment }
 
 @Injectable()
 export class ResultRegistrationService {
@@ -94,5 +97,32 @@ export class ResultRegistrationService {
 
     async deleteResultRegistration(id: string) {
         return this.resultRegistrationModel.findByIdAndDelete(id);
+    }
+
+    async getResultRegistrationByFilter(filter: GetResultRegistrationByFilterDto) {
+        const queryObject: any = {};
+        if (filter.doctor)
+            queryObject.doctor = filter.doctor;
+        if (filter.status)
+            queryObject.status = filter.status;
+        
+        const query = this.resultRegistrationModel.find(queryObject)
+            .populate('shiftSegment')
+            .populate('recordPatient')
+            .populate('medExamService')
+            .lean<ResultRegistrationWithShiftSegment[]>();
+
+        return query.then((resultRegistrations) => {
+            if (filter.startDate && filter.endDate) {
+                return resultRegistrations.filter((resultRegistration) => {
+                    const startDate = new Date(filter.startDate);
+                    const endDate = new Date(filter.endDate);
+                    const registrationDate = new Date(resultRegistration.shiftSegment.date);
+
+                    return registrationDate >= startDate && registrationDate <= endDate;
+                });
+            }
+            return resultRegistrations;
+        });
     }
 }
