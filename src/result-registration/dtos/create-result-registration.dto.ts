@@ -29,6 +29,9 @@ export class CreateResultRegistrationDto {
     @IsNotEmpty()
     fee: number;
 
+    @ApiProperty()
+    description: string;
+
 
     
 }

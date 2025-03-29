@@ -78,7 +78,7 @@ export class ResultRegistrationService {
         const resultRegistration = new this.resultRegistrationModel(createResultRegistrationDto);
 
         resultRegistration.isPaid = true;
-
+        
         const doctor = await this.userModel.findById(createResultRegistrationDto.doctor);
 
         const shiftSegment = await this.shiftSegmentService.updateCurrentRegistrations(createResultRegistrationDto.shiftSegment);
