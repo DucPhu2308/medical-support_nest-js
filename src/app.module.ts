@@ -24,6 +24,7 @@ import { ResultRegistrationModule } from './result-registration/result-registrat
 import { ShiftSegmentModule } from './shift-segment/shift-segment.module';
 import { MedExamServiceModule } from './med-exam-service/med-exam-service.module';
 import { ShiftChangeModule } from './shift-change/shift-change.module';
+import { MedExamHistoryModule } from './med-exam-history/med-exam-history.module';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { ShiftChangeModule } from './shift-change/shift-change.module';
     ShiftSegmentModule,
     MedExamServiceModule,
     ShiftChangeModule,
+    MedExamHistoryModule,
     
   ],
   controllers: [AppController],

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { ResultRegistrationService } from './result-registration.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateResultRegistrationDto } from './dtos/create-result-registration.dto';
@@ -39,7 +39,7 @@ export class ResultRegistrationController {
 
     @Get('/doctor/get-by-filter')
     @UseGuards(AuthGuard)
-    async getResultRegistrationByFilter(@Request() req, @Body() filter: GetResultRegistrationByFilterDto) {
+    async getResultRegistrationByFilter(@Request() req, @Query() filter: GetResultRegistrationByFilterDto) {
         filter.doctor = req.user.sub;
         return this.resultRegistrationService.getResultRegistrationByFilter(filter);
     }
