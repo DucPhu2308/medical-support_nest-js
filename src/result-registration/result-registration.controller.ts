@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
 import { ResultRegistrationService } from './result-registration.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateResultRegistrationDto } from './dtos/create-result-registration.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { GetResultRegistrationByFilterDto } from './dtos/get-result-registration-by-filter.dto';
+import { UpdateResultRegistrationDto } from './dtos/update-result-registration.dto';
 
 @Controller('api/result-registration')
 @ApiTags('Result Registration')
@@ -42,5 +43,11 @@ export class ResultRegistrationController {
     async getResultRegistrationByFilter(@Request() req, @Query() filter: GetResultRegistrationByFilterDto) {
         filter.doctor = req.user.sub;
         return this.resultRegistrationService.getResultRegistrationByFilter(filter);
+    }
+
+    @Put('/update/:id')
+    @UseGuards(AuthGuard)
+    async updateResultRegistration(@Param('id') id: string, @Body() updateResultRegistrationDto: UpdateResultRegistrationDto) {
+        return this.resultRegistrationService.updateResultRegistration(id, updateResultRegistrationDto);
     }
 }

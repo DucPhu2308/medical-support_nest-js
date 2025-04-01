@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
 import { BaseSchema } from "./base.schema";
 
-enum ResultRegistrationStatus {
+export enum ResultRegistrationStatus {
     PENDING = 'pending',
     COMPLETED = 'completed',
     ABSENT = 'absent',
