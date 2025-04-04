@@ -34,8 +34,8 @@ export class RecordPatient extends BaseSchema {
     @Prop()
     createdBy: string;
 
-
-
+    @Prop()
+    usingBy: string;
 
     @Prop()
     provinceCode: string;

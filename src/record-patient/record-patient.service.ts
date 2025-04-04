@@ -18,13 +18,14 @@ export class RecordPatientService {
     async findById(recordPatientId: string) {
         const userId = recordPatientId;
         return this.recordPatientModel.find({
-            createdBy: userId
+            usingBy: userId
         })
     }
 
 
     async createRecordPatient( createRecordPatientDto: CreateRecordPatientDto) {
-        return this.recordPatientModel.create(createRecordPatientDto);
+        const recordData = { ...createRecordPatientDto, usingBy: createRecordPatientDto.createdBy };
+        return this.recordPatientModel.create(recordData);
     }
 
     async updateRecordPatient(recordPatientId: string, createRecordPatientDto: CreateRecordPatientDto) {
@@ -45,6 +46,11 @@ export class RecordPatientService {
                 { phoneNumber: search }
             ]
         });
+    }
+
+
+    async updateUsingBy(recordPatientId: string, usingBy: string) {
+        return this.recordPatientModel.findByIdAndUpdate(recordPatientId, { usingBy });
     }
 
 }

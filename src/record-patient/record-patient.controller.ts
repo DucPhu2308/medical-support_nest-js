@@ -34,6 +34,12 @@ export class RecordPatientController {
     async updateRecordPatient(@Param('recordPatientId') recordPatientId: string, @Body() createRecordPatientDto: CreateRecordPatientDto) {
         return this.recordPatientService.updateRecordPatient(recordPatientId, createRecordPatientDto);
     }
+
+    @Put("/update-using-by/:recordPatientId")
+    @UseGuards(AuthGuard)
+    async updateUsingBy(@Param('recordPatientId') recordPatientId: string, @Body('usingBy') usingBy: string) {
+        return this.recordPatientService.updateUsingBy(recordPatientId, usingBy);
+    }
     
     @Delete("/delete/:recordPatientId")
     @UseGuards(AuthGuard)
