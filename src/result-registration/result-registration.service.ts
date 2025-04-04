@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ResultRegistration } from 'src/schemas/resultRegistration.schema';
@@ -8,6 +8,7 @@ import { User } from 'src/schemas/user.schema';
 import { ShiftSegmentService } from 'src/shift-segment/shift-segment.service';
 import { GetResultRegistrationByFilterDto } from './dtos/get-result-registration-by-filter.dto';
 import { ShiftSegment } from 'src/schemas/shiftSegment.schema';
+import { UpdateResultRegistrationDto } from './dtos/update-result-registration.dto';
 
 type ResultRegistrationWithShiftSegment = ResultRegistration & { shiftSegment: ShiftSegment }
 
@@ -124,5 +125,18 @@ export class ResultRegistrationService {
             }
             return resultRegistrations;
         });
+    }
+
+    async updateResultRegistration(id: string, updateData: UpdateResultRegistrationDto) {
+        const resultRegistration = await this.resultRegistrationModel.findById(id);
+        if (!resultRegistration) {
+            throw new HttpException('Result registration not found', 404);
+        }
+
+        if (updateData.status) {
+            resultRegistration.status = updateData.status;
+        }
+
+        return resultRegistration.save();
     }
 }
