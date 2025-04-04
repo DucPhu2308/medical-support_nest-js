@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { BaseSchema } from "./base.schema";
-import { HydratedDocument } from "mongoose";
+import mongoose, { HydratedDocument } from "mongoose";
 
 @Schema({timestamps: true})
 export class RecordPatient extends BaseSchema {
@@ -31,11 +31,11 @@ export class RecordPatient extends BaseSchema {
     @Prop()
     job: string;
 
-    @Prop()
-    createdBy: string;
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+    createdBy: mongoose.Types.ObjectId;
 
-    @Prop()
-    usingBy: string;
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+    usingBy: mongoose.Types.ObjectId;
 
     @Prop()
     provinceCode: string;

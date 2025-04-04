@@ -36,4 +36,31 @@ export class MedExamHistoryService {
             .populate('doctor')
             .sort({ createdAt: -1 });
     }
+
+    async getMedExamHistoryByUserId(userId: string) {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+            throw new HttpException('User not found', 404);
+        }
+        const recordPatients = await this.recordPatientModel.find({ usingBy: userId });
+        if (!recordPatients || recordPatients.length === 0) {
+            throw new HttpException('RecordPatient not found', 404);
+        }
+        const recordPatientIds = recordPatients.map(recordPatient => recordPatient._id);
+        return this.medExamHistoryModel.find({ recordPatient: { $in: recordPatientIds } })
+            .populate({
+                path: 'doctor',
+                select: 'doctorInfo firstName lastName',
+                populate: {
+                    path: 'doctorInfo',
+                    select: 'specialities',
+                    populate: {
+                        path: 'specialities',
+                        select: 'name'
+                    }
+                }
+            })
+            .sort({ createdAt: -1 })
+            .populate('recordPatient');
+    }
 }

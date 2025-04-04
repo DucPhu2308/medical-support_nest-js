@@ -18,4 +18,11 @@ export class MedExamHistoryController {
     async getMedExamHistoryByRecordPatientId(@Param('recordPatientId') recordPatientId: string) {
         return this.medExamHistoryService.getMedExamHistoryByRecordPatientId(recordPatientId);
     }
+
+    @Get('get-by-user')
+    @UseGuards(AuthGuard)
+    async getMedExamHistoryByUser(@Request() req) {
+        return this.medExamHistoryService.getMedExamHistoryByUserId(req.user.sub);
+    }
+
 }

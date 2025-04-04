@@ -19,7 +19,7 @@ export class RecordPatientController {
 
     @Get("/by-user/:userId")
     async findById(@Param('userId') id: string) {
-        return this.recordPatientService.findById(id);
+        return this.recordPatientService.findByUserId(id);
     }
 
 
