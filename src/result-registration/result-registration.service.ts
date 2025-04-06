@@ -9,14 +9,19 @@ import { ShiftSegmentService } from 'src/shift-segment/shift-segment.service';
 import { GetResultRegistrationByFilterDto } from './dtos/get-result-registration-by-filter.dto';
 import { ShiftSegment } from 'src/schemas/shiftSegment.schema';
 import { UpdateResultRegistrationDto } from './dtos/update-result-registration.dto';
+import { MedExamHistory } from 'src/schemas/med-exam-history.schema';
 
-type ResultRegistrationWithShiftSegment = ResultRegistration & { shiftSegment: ShiftSegment }
+type GetResultRegistrationByFilterResponse = ResultRegistration & {
+    shiftSegment: ShiftSegment,
+    latestVisit: MedExamHistory
+}
 
 @Injectable()
 export class ResultRegistrationService {
     constructor(
         @InjectModel(ResultRegistration.name) private resultRegistrationModel: Model<ResultRegistration>,
         @InjectModel(User.name) private userModel: Model<User>,
+        @InjectModel(MedExamHistory.name) private medExamHistoryModel: Model<MedExamHistory>,
         private readonly shiftSegmentService: ShiftSegmentService,
         private readonly notificationService: NotificationService,
     ) { }
@@ -79,7 +84,7 @@ export class ResultRegistrationService {
         const resultRegistration = new this.resultRegistrationModel(createResultRegistrationDto);
 
         resultRegistration.isPaid = true;
-        
+
         const doctor = await this.userModel.findById(createResultRegistrationDto.doctor);
 
         const shiftSegment = await this.shiftSegmentService.updateCurrentRegistrations(createResultRegistrationDto.shiftSegment);
@@ -106,25 +111,40 @@ export class ResultRegistrationService {
             queryObject.doctor = filter.doctor;
         if (filter.status)
             queryObject.status = filter.status;
-        
+
         const query = this.resultRegistrationModel.find(queryObject)
             .populate('shiftSegment')
             .populate('recordPatient')
             .populate('medExamService')
-            .lean<ResultRegistrationWithShiftSegment[]>();
+            .lean<GetResultRegistrationByFilterResponse[]>();
 
-        return query.then((resultRegistrations) => {
-            if (filter.startDate && filter.endDate) {
-                return resultRegistrations.filter((resultRegistration) => {
-                    const startDate = new Date(filter.startDate);
-                    const endDate = new Date(filter.endDate);
-                    const registrationDate = new Date(resultRegistration.shiftSegment.date);
+        return query
+            .then(async (resultRegistrations) => {
+                // get latest medExamHistory
+                for (const resultRegistration of resultRegistrations) {
+                    const medExamHistory = await this.medExamHistoryModel
+                        .findOne({ recordPatient: resultRegistration.recordPatient._id })
+                        .sort({ createdAt: -1 })
+                        .populate('doctor', 'doctorInfo firstName lastName')
 
-                    return registrationDate >= startDate && registrationDate <= endDate;
-                });
-            }
-            return resultRegistrations;
-        });
+                    if (medExamHistory) {
+                        resultRegistration.latestVisit = medExamHistory;
+                    }
+                }
+                return resultRegistrations;
+            })
+            .then((resultRegistrations) => {
+                if (filter.startDate && filter.endDate) {
+                    return resultRegistrations.filter((resultRegistration) => {
+                        const startDate = new Date(filter.startDate);
+                        const endDate = new Date(filter.endDate);
+                        const registrationDate = new Date(resultRegistration.shiftSegment.date);
+
+                        return registrationDate >= startDate && registrationDate <= endDate;
+                    });
+                }
+                return resultRegistrations;
+            });
     }
 
     async updateResultRegistration(id: string, updateData: UpdateResultRegistrationDto) {

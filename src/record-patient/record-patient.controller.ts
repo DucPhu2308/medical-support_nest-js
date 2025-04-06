@@ -51,4 +51,9 @@ export class RecordPatientController {
     async searchRecordPatient(@Query('q') search: string) {
         return this.recordPatientService.searchRecordPatient(search);
     }
+
+    @Get("/detail/:recordPatientId")
+    async getRecordPatientById(@Param('recordPatientId') recordPatientId: string) {
+        return this.recordPatientService.getRecordPatientById(recordPatientId);
+    }
 }

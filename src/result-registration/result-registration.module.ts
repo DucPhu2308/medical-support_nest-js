@@ -6,6 +6,7 @@ import { ResultRegistration, ResultRegistrationSchema } from 'src/schemas/result
 import { NotificationModule } from 'src/notification/notification.module';
 import { User, UserSchema } from 'src/schemas/user.schema';
 import { ShiftSegmentModule } from 'src/shift-segment/shift-segment.module';
+import { MedExamHistory, MedExamHistorySchema } from 'src/schemas/med-exam-history.schema';
 
 
 @Module({
@@ -13,6 +14,7 @@ import { ShiftSegmentModule } from 'src/shift-segment/shift-segment.module';
     MongooseModule.forFeature([
       { name: ResultRegistration.name, schema: ResultRegistrationSchema },
       { name: User.name, schema: UserSchema },
+      { name: MedExamHistory.name, schema: MedExamHistorySchema },
     ]),
     ShiftSegmentModule,
     NotificationModule,
