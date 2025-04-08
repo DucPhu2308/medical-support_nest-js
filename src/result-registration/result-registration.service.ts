@@ -103,12 +103,6 @@ export class ResultRegistrationService {
     }
 
     async deleteResultRegistration(id: string) {
-        const shiftSegment = await this.resultRegistrationModel.findById(id).populate('shiftSegment');
-        if (!shiftSegment) {
-            throw new HttpException('Result registration not found', 404);
-        }
-        const shiftSegmentId = shiftSegment.shiftSegment._id;
-        await this.shiftSegmentService.updateCurrentRegistrations(shiftSegmentId.toString(), false);
         return this.resultRegistrationModel.findByIdAndDelete(id);
     }
 
@@ -162,6 +156,15 @@ export class ResultRegistrationService {
 
         if (updateData.status) {
             resultRegistration.status = updateData.status;
+        }
+
+        if (updateData.status.toString() === 'cancelled') {
+            const shiftSegment = await this.resultRegistrationModel.findById(id).populate('shiftSegment');
+            if (!shiftSegment) {
+                throw new HttpException('Shift segment not found', 404);
+            }
+            const shiftSegmentId = shiftSegment.shiftSegment._id;
+            await this.shiftSegmentService.updateCurrentRegistrations(shiftSegmentId.toString(), false);
         }
 
         return resultRegistration.save();
