@@ -146,24 +146,33 @@ export class ShiftSegmentService {
     }
 
 
-    async updateCurrentRegistrations(shiftSegmentId: string) {
-        const shiftSegment = await this.shiftSegmentModel.findById(shiftSegmentId);
-
-        if (!shiftSegment) {
-            return null;
+    async updateCurrentRegistrations(shiftSegmentId: string, statusAdd: boolean): Promise<boolean> {
+        const shiftSegment = await this.shiftSegmentModel.findById(shiftSegmentId).lean();
+        if (!shiftSegment) return false;
+    
+        const incrementValue = statusAdd ? 1 : -1;
+        const newCurrentRegistrations = shiftSegment.currentRegistrations + incrementValue;
+    
+        // Nếu giảm xuống dưới 0 hoặc tăng vượt quá max thì không cho phép
+        if (newCurrentRegistrations < 0 || newCurrentRegistrations > shiftSegment.maxRegistrations) {
+            return false;
         }
-
-        if (shiftSegment.currentRegistrations < shiftSegment.maxRegistrations) {
-            shiftSegment.currentRegistrations += 1;
-        }
-
-        if (shiftSegment.currentRegistrations === shiftSegment.maxRegistrations) {
-            shiftSegment.isFull = true;
-        }
-
-        return shiftSegment.save();
+    
+        const result = await this.shiftSegmentModel.updateOne(
+            {
+                _id: shiftSegmentId,
+                currentRegistrations: shiftSegment.currentRegistrations // đảm bảo không có thay đổi ngoài ý muốn
+            },
+            {
+                $inc: { currentRegistrations: incrementValue },
+                $set: {
+                    isFull: newCurrentRegistrations === shiftSegment.maxRegistrations
+                }
+            }
+        );
+    
+        return result.modifiedCount > 0;
     }
-
 
     async updateMaxRegistrations(shiftSegmentId: string, maxRegistrations: number) {
         const shiftSegment = await this.shiftSegmentModel.findById(shiftSegmentId);
@@ -176,7 +185,7 @@ export class ShiftSegmentService {
             throw new Error('Max registrations must be greater than current registrations');
         }
 
-        if( maxRegistrations === shiftSegment.currentRegistrations){
+        if (maxRegistrations === shiftSegment.currentRegistrations) {
             shiftSegment.isFull = true;
         } else {
             shiftSegment.isFull = false;

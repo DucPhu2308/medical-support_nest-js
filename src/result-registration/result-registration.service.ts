@@ -71,6 +71,7 @@ export class ResultRegistrationService {
                     }
                 }
             })
+            .sort({ createdAt: -1 })
             .exec();
     }
 
@@ -82,7 +83,7 @@ export class ResultRegistrationService {
         
         const doctor = await this.userModel.findById(createResultRegistrationDto.doctor);
 
-        const shiftSegment = await this.shiftSegmentService.updateCurrentRegistrations(createResultRegistrationDto.shiftSegment);
+        const shiftSegment = await this.shiftSegmentService.updateCurrentRegistrations(createResultRegistrationDto.shiftSegment, true);
 
         if (!shiftSegment) {
             throw new Error('Shift segment is full');
@@ -97,6 +98,12 @@ export class ResultRegistrationService {
     }
 
     async deleteResultRegistration(id: string) {
+        const shiftSegment = await this.resultRegistrationModel.findById(id).populate('shiftSegment');
+        if (!shiftSegment) {
+            throw new HttpException('Result registration not found', 404);
+        }
+        const shiftSegmentId = shiftSegment.shiftSegment._id;
+        await this.shiftSegmentService.updateCurrentRegistrations(shiftSegmentId.toString(), false);
         return this.resultRegistrationModel.findByIdAndDelete(id);
     }
 
