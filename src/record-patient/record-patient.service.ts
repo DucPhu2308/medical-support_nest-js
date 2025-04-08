@@ -53,4 +53,7 @@ export class RecordPatientService {
         return this.recordPatientModel.findByIdAndUpdate(recordPatientId, { usingBy });
     }
 
+    async getRecordPatientById(recordPatientId: string) {
+        return this.recordPatientModel.findById(recordPatientId);
+    }
 }
