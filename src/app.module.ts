@@ -25,6 +25,8 @@ import { ShiftSegmentModule } from './shift-segment/shift-segment.module';
 import { MedExamServiceModule } from './med-exam-service/med-exam-service.module';
 import { ShiftChangeModule } from './shift-change/shift-change.module';
 import { MedExamHistoryModule } from './med-exam-history/med-exam-history.module';
+import { DrugModule} from './drug/drug.module';
+import { TypeDrugModule } from './type-drug/type-drug.module';
 
 @Module({
   imports: [
@@ -73,6 +75,8 @@ import { MedExamHistoryModule } from './med-exam-history/med-exam-history.module
     MedExamServiceModule,
     ShiftChangeModule,
     MedExamHistoryModule,
+    DrugModule,
+    TypeDrugModule,
     
   ],
   controllers: [AppController],
