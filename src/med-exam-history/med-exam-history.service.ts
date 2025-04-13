@@ -34,6 +34,7 @@ export class MedExamHistoryService {
         }
         return this.medExamHistoryModel.find({ recordPatient: recordPatientId })
             .populate('doctor')
+            .populate('drugAssign.drug')
             .sort({ createdAt: -1 });
     }
 
