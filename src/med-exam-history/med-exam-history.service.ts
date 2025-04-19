@@ -62,6 +62,7 @@ export class MedExamHistoryService {
                 }
             })
             .sort({ createdAt: -1 })
-            .populate('recordPatient');
+            .populate('recordPatient')
+            .populate('drugAssign.drug');
     }
 }
