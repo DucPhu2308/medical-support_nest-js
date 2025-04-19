@@ -18,4 +18,7 @@ export class GetDoctorHaveShiftDto {
 
     @ApiProperty()
     specialtyId : string;
+
+    @ApiProperty()
+    time : string;
 }
