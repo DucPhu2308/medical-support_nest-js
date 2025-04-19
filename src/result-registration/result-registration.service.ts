@@ -127,6 +127,7 @@ export class ResultRegistrationService {
                         .findOne({ recordPatient: resultRegistration.recordPatient._id })
                         .sort({ createdAt: -1 })
                         .populate('doctor', 'doctorInfo firstName lastName')
+                        .populate('drugAssign.drug');
 
                     if (medExamHistory) {
                         resultRegistration.latestVisit = medExamHistory;
