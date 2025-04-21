@@ -18,7 +18,7 @@ export class RecordPatientService {
     async findByUserId(recordPatientId: string) {
         const userId = recordPatientId;
         return this.recordPatientModel.find({
-            createdBy: userId
+            usingBy: userId
         })
     }
 
