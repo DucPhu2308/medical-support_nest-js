@@ -96,6 +96,7 @@ export class DoctorService {
         let doctorsWithShift = doctors.filter(doctor =>
             shiftAssignments.some(shift => shift.user._id.toString() === doctor._id.toString())
         );
+
     
         let matchingSegments: any[] = [];
     
@@ -114,6 +115,7 @@ export class DoctorService {
                 path: 'shiftAssignment',
                 select: '_id user',
             });
+
     
             matchingSegments = shiftSegments.filter(segment => {
                 const start = timeToMinutes(segment.startTime);
@@ -129,6 +131,7 @@ export class DoctorService {
                     matchingShiftAssignmentIds.includes(shift._id.toString())
                 )
             );
+
         }
     
         if (specialtyId) {
