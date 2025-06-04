@@ -134,12 +134,20 @@ export class ShiftAssignmentService {
         // get shift assignment by doctorId of month and year
         const startOfMonth = new Date(year, month - 1, 1);
         const endOfMonth = new Date(year, month, 0);
+
+        const formatDate = (date) => {
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        };
+
         return this.shiftAssignmentModel
             .find({
                 user: doctorId,
                 date: {
-                    $gte: startOfMonth.toISOString().split('T')[0],
-                    $lte: endOfMonth.toISOString().split('T')[0],
+                    $gte: formatDate(startOfMonth),
+                    $lte: formatDate(endOfMonth),
                 }
             })
             .populate('shift', 'name startTime endTime');
